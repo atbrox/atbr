@@ -19,17 +19,21 @@ Silverstein).
 
 ### prerequisites:
 a) install google sparsehash (and densehash)
-	wget http://sparsehash.googlecode.com/files/sparsehash-2.0.2.tar.gz
-	wget http://sparsehash.googlecode.com/files/sparsehash-2.0.2.tar.gz
-	tar -zxvf sparsehash-2.0.2.tar.gz
-	cd sparsehash-2.0.2
-	./configure && make && make install
+
+   wget http://sparsehash.googlecode.com/files/sparsehash-2.0.2.tar.gz
+   wget http://sparsehash.googlecode.com/files/sparsehash-2.0.2.tar.gz
+   tar -zxvf sparsehash-2.0.2.tar.gz
+   cd sparsehash-2.0.2
+   ./configure && make && make install
+
 b) install swig
 
 ### install
+
     make swigpy # creates atbr.py and _atbr.so importable from python
 
 ### python-api example
+
     import atbr
 
     # Create storage
