@@ -14,6 +14,7 @@
 #include <cstdint>
 
 using std::string;
+using google::sparse_hash_map;
 using google::dense_hash_map;
 
   class Atbr {
@@ -58,6 +59,7 @@ using google::dense_hash_map;
 
       unsigned long size_before = size();
       struct timespec start, stop;
+
       clock_gettime(CLOCK_MONOTONIC, &start);
 
       FILE* fp = fopen(filename, "r");
@@ -102,9 +104,11 @@ using google::dense_hash_map;
 #ifndef SPARSE_MAP
     dense_hash_map<string, string> storage;
     dense_hash_map<string, string>::iterator it;
+    //const char* hash_type = "dense";
 #else
     sparse_hash_map<string, string> storage;
     sparse_hash_map<string, string>::iterator it;
+    //const char* hash_type = "sparse";
 #endif
   };
 
