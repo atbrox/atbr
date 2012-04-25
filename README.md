@@ -21,9 +21,11 @@ Silverstein).
 a) install google sparsehash (and densehash)
 
    wget http://sparsehash.googlecode.com/files/sparsehash-2.0.2.tar.gz
-   wget http://sparsehash.googlecode.com/files/sparsehash-2.0.2.tar.gz
+
    tar -zxvf sparsehash-2.0.2.tar.gz
+
    cd sparsehash-2.0.2
+
    ./configure && make && make install
 
 b) install swig
