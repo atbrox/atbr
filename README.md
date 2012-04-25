@@ -1,6 +1,6 @@
 ### What is atbr
 
-large-scale in-memory key-value pair store. 
+large-scale in-memory key-value pair store for Python (so far..)
 
 In reality: a thin SWIG-wrapper around Google's sparsehash library (a
 library for memory efficient hashtables for C++ created by Craig
