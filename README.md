@@ -52,7 +52,30 @@ b) install swig
     
     # Return true if a key exists
     print mystore.exists("key1")
-    
+
+### benchmark (loading)    
+
+Input for the bencmark was output from a small Hadoop (mapreduce) job
+that generated key, value pairs where both the key and value were
+json. The benchmark was done an Ubuntu-based Thinkpad x200 with SSD
+drive.
+
+     $ ls -al medium.tsv
+     -rw-r--r-- 1 amund amund 117362571 2012-04-25 15:36 medium.tsv
+
+     $ wc medium.tsv
+     212969   5835001 117362571 medium.tsv
+     
+     $ python
+     >>> import atbr
+     >>> a = atbr.Atbr()
+     >>> a.load("medium.tsv")
+     Inserting took - 1.178468 seconds
+     Num new key-value pairs = 212969
+     Speed: 180716.807959 key-value pairs per second
+     Throughput: 94.803214 MB per second
+
+
     
 
 

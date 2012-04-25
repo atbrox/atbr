@@ -58,6 +58,7 @@ using google::dense_hash_map;
     void load(const char* filename) {
 
       unsigned long size_before = size();
+      unsigned long totsize = 0;
       struct timespec start, stop;
 
       clock_gettime(CLOCK_MONOTONIC, &start);
@@ -69,8 +70,12 @@ using google::dense_hash_map;
 	  while( fgets(linebuffer, LINE_BUFFER_SIZE, fp) )
 	    {
 	      if(linebuffer[strlen(linebuffer)-1] == '\n') {
+
 		linebuffer[strlen(linebuffer)-1] = 0;
 	      }
+
+	      totsize += strlen(linebuffer);
+
 	      char *key = strtok(linebuffer,"\t");
 	      char *value = strtok(NULL,"\t");
 	      if(key != NULL && value != NULL) {
@@ -90,6 +95,7 @@ using google::dense_hash_map;
       printf("Inserting took - %f seconds\n", second_diff);
       printf("Num new key-value pairs = %ld\n", (size_after-size_before));
       printf("Speed: %f key-value pairs per second\n", (size_after-size_before)/second_diff);
+      printf("Throughput: %f MB per second\n", (totsize/(1024*1024.0))/second_diff);
     }
 
 
