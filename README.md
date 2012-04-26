@@ -20,6 +20,12 @@ Silverstein).
 
 ### install
 
+Run the following to install atbr (including its dependencies)
+
+    chmod +x ./INSTALL.sh && ./INSTALL.sh
+
+which basically does this:
+
     $ sudo apt-get install libboost-dev python-setuptools swig* python-dev -y
     $ sudo pip install -r requirements.txt # or under virtualenv
 
