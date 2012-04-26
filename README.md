@@ -18,26 +18,15 @@ Silverstein).
 
     5) atbr is fast (in particular to load from file)
 
-### prerequisites:
-a) misc. packages for building:
-
-   $ sudo apt-get install libboost-dev python-setuptools swig* python-dev -y
-
-b) install required python packages (e.g. tornado)
-
-   $ sudo pip install -r requirements.txt # or under virtualenv
-
-c) install google sparsehash (and densehash)
-
-   $ wget http://sparsehash.googlecode.com/files/sparsehash-2.0.2.tar.gz
-
-   $ tar -zxvf sparsehash-2.0.2.tar.gz
-
-   $ cd sparsehash-2.0.2
-
-   $ ./configure && make && sudo make install
-
 ### install
+
+    $ sudo apt-get install libboost-dev python-setuptools swig* python-dev -y
+    $ sudo pip install -r requirements.txt # or under virtualenv
+
+    $ wget http://sparsehash.googlecode.com/files/sparsehash-2.0.2.tar.gz
+    $ tar -zxvf sparsehash-2.0.2.tar.gz
+    $ cd sparsehash-2.0.2
+    $ ./configure && make && sudo make install
 
     $ sudo python setup.py install  # or under virtualenv
 
