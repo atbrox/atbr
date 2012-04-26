@@ -73,9 +73,11 @@ class AtbrLoadWebsocketHandler(tornado.websocket.WebSocketHandler):
 
     def on_message(self, message):
         try:
-            assert message and type(message) == str
+            #assert message and type(message) == str
+            print "message load = ", message, type(message)
+            filename = str(message)
             global key_value_store
-            key_value_store.load(message)
+            key_value_store.load(filename)
         except Exception, e:
             logging.error([e])
 
@@ -94,9 +96,9 @@ def main():
         (r'/get/key/(.*)', AtbrGetHttpHandler),
         (r'/put/key/(.*)/value/(.*)', AtbrPutHandler),
         (r'/load/(.*)', AtbrPutHandler),
-        (r'/getws/', AtbrGetHttpHandler),
-        (r'/putws/', AtbrPutHandler),
-        (r'/loadws/', AtbrPutHandler),
+        (r'/getws/', AtbrGetWebsocketHandler),
+        (r'/putws/', AtbrPutWebsocketHandler),
+        (r'/loadws/', AtbrLoadWebsocketHandler),
 
     ], **settings)
 
