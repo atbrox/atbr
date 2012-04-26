@@ -114,18 +114,18 @@ Example that loads keyvaluedata.tsv using websocket load api
 
 ##### websocket client code
 
-import sys
-from websocket import create_connection
+      import sys
+      from websocket import create_connection
 
-def websocket_client_main(argv):
-    ws = create_connection("ws://localhost:8888/loadws/")
-    ws.send(argv[1])
-    result =  ws.recv()
-    ws.close()
-    return result
-
-if __name__ == "__main__":
-    websocket_client_main(sys.argv)
+      def websocket_client_main(argv):
+      	  ws = create_connection("ws://localhost:8888/loadws/")
+	  ws.send(argv[1])
+	  result =  ws.recv()
+	  ws.close()
+	  return result
+	  
+	  if __name__ == "__main__":
+	     websocket_client_main(sys.argv)
 
 
     
