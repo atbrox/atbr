@@ -112,9 +112,7 @@ Example that loads keyvaluedata.tsv using websocket load api
 
      python websocket_cmdline_client.py keyvaluedata.tsv
 
-API example code
-
-#!/usr/bin/env python
+##### websocket client code
 
 import sys
 from websocket import create_connection
