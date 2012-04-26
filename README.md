@@ -18,7 +18,15 @@ Silverstein).
 5) atbr is fast (in particular to load from file)
 
 ### prerequisites:
-a) install google sparsehash (and densehash)
+a) misc. packages for building:
+
+   sudo apt-get install libboost-dev python-setuptools swig* python-dev -y
+
+b) install required python packages (e.g. tornado)
+
+   sudo pip install -r requirements.txt # or under virtualenv
+
+c) install google sparsehash (and densehash)
 
    wget http://sparsehash.googlecode.com/files/sparsehash-2.0.2.tar.gz
 
@@ -28,11 +36,9 @@ a) install google sparsehash (and densehash)
 
    ./configure && make && sudo make install
 
-b) install swig
-
 ### install
 
-    python setup.py install
+    sudo python setup.py install  # or under virtualenv
 
 ### python-api example
 
@@ -77,11 +83,15 @@ drive.
 
 ### atbr http and websocket server
 
-atbr can also run as a server (default port is 8888)
+atbr can also run as a server (default port is 8888), supporting both
+http and websocket
 
 Start server:
 
      $ python atbr_server.py
+
+
+#### HTTP API
 
 Load tsv-file data with http     
 
@@ -94,6 +104,12 @@ Get value for key = 'key1'
 Add key, value pair key='foo', value='bar'
 
     $ curl http://localhost:8888/put/key/foo/value/bar
+
+#### Websocket API
+
+
+
+
 
 
     
