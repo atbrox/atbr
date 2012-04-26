@@ -7,38 +7,39 @@ library for memory efficient hashtables for C++ created by Craig
 Silverstein).
 
 ### motivation
-1) Modern boxes have 10-100s of Gigabytes of RAM
 
-2) GB+-size Python dictionaries are slow to fill
+    1) Modern boxes have 10-100s of Gigabytes of RAM
 
-3) GB+-size Python dictionaries are not fun to use
+    2) GB+-size Python dictionaries are slow to fill
 
-4) GB+-size dictionaries are fun to use
+    3) GB+-size Python dictionaries are not fun to use
 
-5) atbr is fast (in particular to load from file)
+    4) GB+-size dictionaries are fun to use
+
+    5) atbr is fast (in particular to load from file)
 
 ### prerequisites:
 a) misc. packages for building:
 
-   sudo apt-get install libboost-dev python-setuptools swig* python-dev -y
+   $ sudo apt-get install libboost-dev python-setuptools swig* python-dev -y
 
 b) install required python packages (e.g. tornado)
 
-   sudo pip install -r requirements.txt # or under virtualenv
+   $ sudo pip install -r requirements.txt # or under virtualenv
 
 c) install google sparsehash (and densehash)
 
-   wget http://sparsehash.googlecode.com/files/sparsehash-2.0.2.tar.gz
+   $ wget http://sparsehash.googlecode.com/files/sparsehash-2.0.2.tar.gz
 
-   tar -zxvf sparsehash-2.0.2.tar.gz
+   $ tar -zxvf sparsehash-2.0.2.tar.gz
 
-   cd sparsehash-2.0.2
+   $ cd sparsehash-2.0.2
 
-   ./configure && make && sudo make install
+   $ ./configure && make && sudo make install
 
 ### install
 
-    sudo python setup.py install  # or under virtualenv
+    $ sudo python setup.py install  # or under virtualenv
 
 ### python-api example
 
