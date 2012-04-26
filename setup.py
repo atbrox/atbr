@@ -9,12 +9,19 @@ setup.py file for atbr
 # http://docs.python.org/distutils/apiref.html
 
 from distutils.core import setup, Extension
+from distutils.sysconfig import get_config_vars
 import os
 
 os.environ['CC'] = 'g++'
 os.environ['CXX'] = 'g++'
 os.environ['CPP'] = 'g++'
 os.environ['LDSHARED'] = 'g++'
+
+# remove erranous default parameter Wstrict-prototypes
+(opt,) = get_config_vars('OPT')
+os.environ['OPT'] = " ".join(
+    flag for flag in opt.split() if flag != '-Wstrict-prototypes'
+)
 
 setup( 
     name = "atbr",
