@@ -1,6 +1,7 @@
 __author__ = 'amund'
 
 import tornado.web
+import tornado.websocket
 import os
 import atbr
 import logging
@@ -16,6 +17,21 @@ class AtbrGetHttpHandler(tornado.web.RequestHandler):
         except Exception, e:
             logging.error([e])
 
+class AtbrGetWebsocketHandler(tornado.websocket.WebSocketHandler):
+    def __init__(self, application, request):
+        tornado.websocket.WebSocketHandler.__init__(self, application, request)
+
+    def on_message(self, message):
+        try:
+            assert message and type(message) == str
+            global key_value_store
+            self.write_message(key_value_store.get(message))
+        except Exception, e:
+            logging.error([e])
+
+    def on_close(self):
+        pass
+
 class AtbrPutHandler(tornado.web.RequestHandler):
     def get(self, key, value):
         try:
@@ -26,6 +42,22 @@ class AtbrPutHandler(tornado.web.RequestHandler):
         except Exception, e:
             logging.error([e])
 
+class AtbrPutWebsocketHandler(tornado.websocket.WebSocketHandler):
+    def __init__(self, application, request):
+        tornado.websocket.WebSocketHandler.__init__(self, application, request)
+
+    def on_message(self, message):
+        try:
+            assert message and type(message) == str
+            (key, value) = message.split("\t")
+            global key_value_store
+            key_value_store.put(key, value)
+        except Exception, e:
+            logging.error([e])
+
+    def on_close(self):
+        pass
+
 class AtbrLoadHandler(tornado.web.RequestHandler):
     def get(self, filename):
         try:
@@ -34,6 +66,21 @@ class AtbrLoadHandler(tornado.web.RequestHandler):
             key_value_store.load(filename)
         except Exception, e:
             logging.error([e])
+
+class AtbrLoadWebsocketHandler(tornado.websocket.WebSocketHandler):
+    def __init__(self, application, request):
+        tornado.websocket.WebSocketHandler.__init__(self, application, request)
+
+    def on_message(self, message):
+        try:
+            assert message and type(message) == str
+            global key_value_store
+            key_value_store.load(message)
+        except Exception, e:
+            logging.error([e])
+
+    def on_close(self):
+        pass
 
 def main():
     settings = {
@@ -45,7 +92,12 @@ def main():
 
     application = tornado.web.Application([
         (r'/get/key/(.*)', AtbrGetHttpHandler),
-        (r'put/key/(.*)/value/(.*)', AtbrPutHandler),
+        (r'/put/key/(.*)/value/(.*)', AtbrPutHandler),
+        (r'/load/(.*)', AtbrPutHandler),
+        (r'/getws/', AtbrGetHttpHandler),
+        (r'/putws/', AtbrPutHandler),
+        (r'/loadws/', AtbrPutHandler),
+
     ], **settings)
 
     application.listen(8888)
