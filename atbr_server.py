@@ -75,8 +75,6 @@ class AtbrLoadWebsocketHandler(tornado.websocket.WebSocketHandler):
 
     def on_message(self, message):
         try:
-            #assert message and type(message) == str
-            print "message load = ", message, type(message)
             filename = str(message)
             global key_value_store
             key_value_store.load(filename)
