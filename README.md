@@ -55,7 +55,7 @@ b) install swig
 
 ### benchmark (loading)    
 
-Input for the bencmark was output from a small Hadoop (mapreduce) job
+Input for the benchmark was output from a small Hadoop (mapreduce) job
 that generated key, value pairs where both the key and value were
 json. The benchmark was done an Ubuntu-based Thinkpad x200 with SSD
 drive.
@@ -75,6 +75,31 @@ drive.
      Speed: 180716.807959 key-value pairs per second
      Throughput: 94.803214 MB per second
 
+### atbr http and websocket server
+
+atbr can also run as a server (default port is 8888)
+
+Start server:
+
+     $ python atbr_server.py
+
+Load tsv-file data with http     
+
+     $ curl http://localhost:8888/load/keyvaluedata.tsv
+
+Get value for key = 'key1'
+
+    $ curl http://localhost:8888/get/key/key1
+
+Add key, value pair key='foo', value='bar'
+
+    $ curl http://localhost:8888/put/key/foo/value/bar
+
+
+    
+    
+
+     
 
     
 

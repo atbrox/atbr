@@ -11,8 +11,9 @@ key_value_store = atbr.Atbr()
 class AtbrGetHttpHandler(tornado.web.RequestHandler):
     def get(self, key):
         try:
-            assert key and type(key) == str
+            assert key and type(key) == unicode
             global key_value_store
+            key = str(key)
             self.write(key_value_store.get(key))
         except Exception, e:
             logging.error([e])
@@ -35,10 +36,10 @@ class AtbrGetWebsocketHandler(tornado.websocket.WebSocketHandler):
 class AtbrPutHandler(tornado.web.RequestHandler):
     def get(self, key, value):
         try:
-            assert key and type(key) == str
-            assert value and type(value) == str
+            assert key and type(key) == unicode
+            assert value and type(value) == unicode
             global key_value_store
-            key_value_store.put(key,value)
+            key_value_store.put(str(key),str(value))
         except Exception, e:
             logging.error([e])
 
@@ -61,8 +62,9 @@ class AtbrPutWebsocketHandler(tornado.websocket.WebSocketHandler):
 class AtbrLoadHandler(tornado.web.RequestHandler):
     def get(self, filename):
         try:
-            assert filename and type(filename) == str
+            assert filename and type(filename) == unicode
             global key_value_store
+            filename = str(filename)
             key_value_store.load(filename)
         except Exception, e:
             logging.error([e])
@@ -95,7 +97,7 @@ def main():
     application = tornado.web.Application([
         (r'/get/key/(.*)', AtbrGetHttpHandler),
         (r'/put/key/(.*)/value/(.*)', AtbrPutHandler),
-        (r'/load/(.*)', AtbrPutHandler),
+        (r'/load/(.*)', AtbrLoadHandler),
         (r'/getws/', AtbrGetWebsocketHandler),
         (r'/putws/', AtbrPutWebsocketHandler),
         (r'/loadws/', AtbrLoadWebsocketHandler),
