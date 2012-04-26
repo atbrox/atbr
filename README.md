@@ -118,7 +118,8 @@ Example that loads keyvaluedata.tsv using websocket load api
       from websocket import create_connection
 
       ws = create_connection("ws://localhost:8888/loadws/")
-      ws.send(argv[1])
+      # e.g. sys.argv[1] could 'keyvaluedata.tsv'
+      ws.send(sys.argv[1])
       result =  ws.recv()
       ws.close()
       print result
