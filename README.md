@@ -26,13 +26,13 @@ a) install google sparsehash (and densehash)
 
    cd sparsehash-2.0.2
 
-   ./configure && make && make install
+   ./configure && make && sudo make install
 
 b) install swig
 
 ### install
 
-    make swigpy # creates atbr.py and _atbr.so importable from python
+    python setup.py install
 
 ### python-api example
 
