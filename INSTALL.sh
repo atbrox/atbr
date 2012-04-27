@@ -1,7 +1,8 @@
 #!/bin/bash
 
 echo "step 1 (of 4) Installing prerequisite unix/python componentswith apt-get"
-sudo apt-get install libboost-dev python-setuptools swig* python-dev -y
+#sudo apt-get install libboost-dev python-setuptools swig* python-dev -y
+sudo apt-get install python-setuptools swig* python-dev -y
 
 echo "step 2 (of 4) Installing python library requirements with pip"
 sudo pip install -r pip_requirements.txt # or under virtualenv
