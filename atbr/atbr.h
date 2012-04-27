@@ -34,7 +34,6 @@ using google::dense_hash_map;
       string skey = string(key);
       it = storage.find(skey);
       if(it!=storage.end()) {
-	printf("found..");
 	return it->second.c_str();
       }
       return (const char*) "";
