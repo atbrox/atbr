@@ -31,8 +31,7 @@ setup(
     ext_modules = [ 
         Extension( 
             "_atbr",
-            #sources = ["atbrpy.i","atbrpy_wrap.cpp"],
-            sources = ["atbrpy.i"],
+            sources = ["src/atbrpy.i"],
             swig_opts=["-Wall","-c++"],
             libraries=['rt','python2.6'],
             include_dirs = ['/usr/include/python2.6'],
