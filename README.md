@@ -1,4 +1,4 @@
-![atbr](https://github.com/atbrox/atbr/raw/master/atbr_medium.png)
+![atbr](https://github.com/atbrox/atbr/img/raw/master/atbr_medium.png)
 
 ### What is atbr?
 
