@@ -1,4 +1,6 @@
-### What is atbr
+![atbr](https://github.com/atbrox/atbr/raw/master/atbr_medium.png)
+
+### What is atbr?
 
 large-scale in-memory key-value pair store for Python (so far..)
 
@@ -6,7 +8,7 @@ In reality: a thin SWIG-wrapper around Google's sparsehash library (a
 library for memory efficient hashtables for C++ created by Craig
 Silverstein).
 
-### motivation
+### Why atbr?
 
     1) Modern boxes have 10-100s of Gigabytes of RAM
 
