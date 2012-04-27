@@ -38,7 +38,7 @@ it basically does this:
 
 ### python-api example
 
-    import atbr
+    from atbr import atbr
 
     # Create storage
     mystore = atbr.Atbr()
@@ -84,7 +84,7 @@ http and websocket
 
 Start server:
 
-     $ python atbr_server.py
+     $ cd atbserver ; python atbr_server.py
 
 
 #### HTTP API
