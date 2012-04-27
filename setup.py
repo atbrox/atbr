@@ -30,8 +30,8 @@ setup(
     version = "0.1", 
     ext_modules = [ 
         Extension( 
-            "_atbr",
-            sources = ["src/atbrpy.i"],
+            "atbr._atbr",
+            sources = ["atbr/atbrpy.i"],
             swig_opts=["-Wall","-c++"],
             libraries=['rt','python2.6'],
             include_dirs = ['/usr/include/python2.6'],
@@ -39,5 +39,6 @@ setup(
             extra_link_args = ['-shared'],
             language=["c++"]
             ),
-        ] 
+        ],
+    packages=['atbr', 'atbrserver']
     )
