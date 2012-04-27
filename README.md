@@ -21,9 +21,10 @@ large-scale in-memory key-value pair store for Python
 
 Run the following to install atbr (including its dependencies)
 
-    chmod +x ./INSTALL.sh && ./INSTALL.sh
+    $ cat INSTALL.sh # to see what it does
+    $ chmod +x ./INSTALL.sh && sudo ./INSTALL.sh
 
-which basically does this:
+it basically does this:
 
     $ sudo apt-get install libboost-dev python-setuptools swig* python-dev -y
     $ sudo pip install -r requirements.txt # or under virtualenv
