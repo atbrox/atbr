@@ -2,11 +2,8 @@
 
 ### What is atbr?
 
-large-scale in-memory key-value pair store for Python (so far..)
+large-scale in-memory key-value pair store for Python
 
-In reality: a thin SWIG-wrapper around Google's sparsehash library (a
-library for memory efficient hashtables for C++ created by Craig
-Silverstein).
 
 ### Why atbr?
 
@@ -120,6 +117,13 @@ Example that loads keyvaluedata.tsv using websocket load api
       result =  ws.recv()
       ws.close()
       print result
+
+### What type of datastructure is used in atbr?
+
+Currently Google's sparsehash library (a library for memory efficient
+hashtables for C++ created by Craig Silverstein). Will probably
+support other efficient C++-based datastructures in the future.
+
 
 
     
