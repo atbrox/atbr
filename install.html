@@ -1,0 +1,192 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Atbr - large memory key-value pair store - supported by atbrox</title>
+    
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+<script src='http://mint.atbrox.com/?js' type='text/javascript'></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1><img src="https://s3.amazonaws.com/atbr/atbr_medium.png" alt="atbr"></h1>
+        <p>large-memory key-value pair store</p>
+        <p class="view"><a href="https://github.com/atbrox/atbr">View the Project on GitHub <small>atbrox/atbr</small></a></p>
+        <ul>
+          <li><a href="https://github.com/atbrox/atbr/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/atbrox/atbr/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/atbrox/atbr">Fork On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+
+<h3>What is atbr?</h3>
+
+<p>large-scale in-memory key-value pair store for Python</p>
+
+<h3>Why atbr?</h3>
+
+<pre><code>1) Modern boxes have 10-100s of Gigabytes of RAM
+
+2) GB+-size Python dictionaries are slow to fill
+
+3) GB+-size Python dictionaries are not fun to use
+
+4) GB+-size dictionaries are fun to use
+
+5) atbr is fast (in particular to load from file)
+</code></pre>
+
+<h3>install</h3>
+
+<p>Run the following to install atbr (including its dependencies)</p>
+
+<pre><code>$ cat INSTALL.sh # to see what it does
+$ chmod +x ./INSTALL.sh &amp;&amp; sudo ./INSTALL.sh
+</code></pre>
+
+<p>it basically does this:</p>
+
+<pre><code>$ sudo apt-get install libboost-dev python-setuptools swig* python-dev -y
+$ sudo pip install -r requirements.txt # or under virtualenv
+
+$ wget http://sparsehash.googlecode.com/files/sparsehash-2.0.2.tar.gz
+$ tar -zxvf sparsehash-2.0.2.tar.gz
+$ cd sparsehash-2.0.2
+$ ./configure &amp;&amp; make &amp;&amp; sudo make install
+
+$ sudo python setup.py install  # or under virtualenv
+</code></pre>
+
+<h3>python-api example</h3>
+
+<pre><code>from atbr import atbr
+
+# Create storage
+mystore = atbr.Atbr()
+
+# Load data
+mystore.load("keyvaluedata.tsv")
+
+# Number of key value pairs
+print mystore.size()
+
+# Get value corresponding to key
+print mystore.get("key1")
+
+# Return true if a key exists
+print mystore.exists("key1")
+</code></pre>
+
+<h3>benchmark (loading)</h3>
+
+<p>Input for the benchmark was output from a small Hadoop (mapreduce) job
+that generated key, value pairs where both the key and value were
+json. The benchmark was done an Ubuntu-based Thinkpad x200 with SSD
+drive.</p>
+
+<pre><code> $ ls -al medium.tsv
+ -rw-r--r-- 1 amund amund 117362571 2012-04-25 15:36 medium.tsv
+
+ $ wc medium.tsv
+ 212969   5835001 117362571 medium.tsv
+
+ $ python
+ &gt;&gt;&gt; import atbr
+ &gt;&gt;&gt; a = atbr.Atbr()
+ &gt;&gt;&gt; a.load("medium.tsv")
+ Inserting took - 1.178468 seconds
+ Num new key-value pairs = 212969
+ Speed: 180716.807959 key-value pairs per second
+ Throughput: 94.803214 MB per second
+</code></pre>
+
+<h3>atbr http and websocket server</h3>
+
+<p>atbr can also run as a server (default port is 8888), supporting both
+http and websocket</p>
+
+<p>Start server:</p>
+
+<pre><code> $ cd atbserver ; python atbr_server.py
+</code></pre>
+
+<h4>HTTP API</h4>
+
+<p>Load tsv-file data with http     </p>
+
+<pre><code> $ curl http://localhost:8888/load/keyvaluedata.tsv
+</code></pre>
+
+<p>Get value for key = 'key1'</p>
+
+<pre><code>$ curl http://localhost:8888/get/key/key1
+</code></pre>
+
+<p>Add key, value pair key='foo', value='bar'</p>
+
+<pre><code>$ curl http://localhost:8888/put/key/foo/value/bar
+</code></pre>
+
+<h4>Websocket API</h4>
+
+<p>Example that loads keyvaluedata.tsv using websocket load api</p>
+
+<pre><code> python websocket_cmdline_client.py keyvaluedata.tsv
+</code></pre>
+
+<h5>websocket client code</h5>
+
+<pre><code>  import sys
+  from websocket import create_connection
+
+  ws = create_connection("ws://localhost:8888/loadws/")
+  # e.g. sys.argv[1] could 'keyvaluedata.tsv'
+  ws.send(sys.argv[1])
+  result =  ws.recv()
+  ws.close()
+  print result
+</code></pre>
+
+<h3>What type of datastructure is used in atbr?</h3>
+
+<p>Currently Google's sparsehash library (a library for memory efficient
+hashtables for C++ created by Craig Silverstein). Will probably
+support other efficient C++-based datastructures in the future.</p>
+
+
+<h3>Who develops and supports atbr?</h3>
+<p>
+atbr is developed and supported by <a href="http://atbrox.com/about/">Atbrox</a>
+
+<a href="http://atbrox.com/about/"><img src="atbroxlogo.png"></a>
+</p>
+
+
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/atbrox">atbrox</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-31247754-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
