@@ -4,7 +4,7 @@ import sys
 from websocket import create_connection
 
 def websocket_client_main(argv):
-    ws = create_connection("ws://localhost:8888/loadws/")
+    ws = create_connection("ws://localhost:9999/getws/")
     print ws
     ws.send(argv[1])
     result =  ws.recv()

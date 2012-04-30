@@ -25,9 +25,9 @@ class AtbrGetWebsocketHandler(tornado.websocket.WebSocketHandler):
 
     def on_message(self, message):
         try:
-            assert message and type(message) == str
+            print "message = ", message, type(message)
             global key_value_store
-            self.write_message(key_value_store.get(message))
+            self.write_message(key_value_store.get(str(message)))
         except Exception, e:
             logging.error([e])
 
