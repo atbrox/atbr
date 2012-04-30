@@ -176,7 +176,7 @@ Start several atbr servers and finally one (or several) atbr shard servers to ta
 </code></pre>
 
 
-<h3>What type of datastructure is used in atbr?</h3>
+<h3>What type of storage datastructure is used in atbr?</h3>
 
 <p>Currently:
 
@@ -185,6 +185,9 @@ Start several atbr servers and finally one (or several) atbr shard servers to ta
 <li>Google's densemap library
 <li>C++/STL unordered_map
 </ol>
+
+The reason why Google's sparsehash is default is that is highly memory efficient, see
+<a href="http://blog.aggregateknowledge.com/2011/11/27/big-memory-part-3-5-google-sparsehash/">this benchmark for more</a>
 
 Will support other efficient C++-based datastructures in later versions
 </p>
