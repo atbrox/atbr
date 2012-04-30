@@ -5,6 +5,7 @@ import tornado.websocket
 import os
 import atbr.atbr
 import logging
+import sys
 
 key_value_store = atbr.atbr.Atbr()
 
@@ -109,14 +110,14 @@ class AtbrSaveWebsocketHandler(tornado.websocket.WebSocketHandler):
     def on_close(self):
         pass
 
-def main():
+
+def init_tornado(port_number):
     settings = {
         "static_path": os.path.join(os.path.dirname(__file__), "static"),
         "cookie_secret": "lkjsdflkjdslkjsdflkjsdlfkjslkjfdslkjfjds",
         #"login_url": "/login",
         "xsrf_cookies": False
     }
-
     application = tornado.web.Application([
         (r'/get/key/(.*)', AtbrGetHttpHandler),
         (r'/put/key/(.*)/value/(.*)', AtbrPutHttpHandler),
@@ -128,9 +129,27 @@ def main():
         (r'/savews/', AtbrSaveWebsocketHandler),
 
     ], **settings)
-
-    application.listen(8888)
+    application.listen(port_number)
     tornado.ioloop.IOLoop.instance().start()
 
+def main(argv):
+    try:
+        if len(argv) == 1:
+            port_number = 8888
+            init_tornado(port_number)
+        else:
+            port_number = int(argv[1])
+            input_files = argv[2:]
+
+            # load files
+            print "Loading files"
+            for file_name in input_files:
+                key_value_store.load(file_name)
+
+            init_tornado(port_number)
+    except Exception, e:
+        print "Error: ", e
+        print "Usage: python %s <port_number> <input_file_1> .. <input_file_n>"
+
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
