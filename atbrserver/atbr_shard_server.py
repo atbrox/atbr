@@ -18,16 +18,11 @@ class AtbrShardGetWebsocketHandler(tornado.websocket.WebSocketHandler):
 
     def on_message(self, message):
         try:
-            print "getting message"
             global shards
-
             results = []
             for i, shard in enumerate(shards.keys()):
-                print "i, shard = ", i, shard
                 shards[shard].send(message)
-                print "after sending message.."
                 result = shards[shard].recv()
-                print "result from shard %d = '%s'" % (i, result)
                 results.append(result)
 
             self.write_message(json.dumps(results))
