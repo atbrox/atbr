@@ -157,11 +157,35 @@ http and websocket</p>
   print result
 </code></pre>
 
+<h3>Sharded Websocket Modus?</h3>
+
+Start several atbr servers and finally one (or several) atbr shard servers to talk to them, example:
+
+<pre><code>
+
+  $ python atbr_server 8585 shard_data_1.tsv
+  $ python atbr_server 8686 shard_data_2.tsv
+  $ python atbr_server 8787 shard_data_2.tsv
+  
+  $ python atbr_shard_server.py localhost:8585 localhost:8686 localhost:8686
+  
+  $ python atbr_websocket_cmdline_client.py key1
+
+</code></pre>
+
+
 <h3>What type of datastructure is used in atbr?</h3>
 
-<p>Currently Google's sparsehash library (a library for memory efficient
-hashtables for C++ created by Craig Silverstein). Will probably
-support other efficient C++-based datastructures in the future.</p>
+<p>Currently:
+
+<ol>
+<li>default: Google's sparsehash library 
+<li>Google's densemap library
+<li>C++/STL unordered_map
+</ol>
+
+Will support other efficient C++-based datastructures in later versions
+</p>
 
 
 <h3>Who develops and supports atbr?</h3>
