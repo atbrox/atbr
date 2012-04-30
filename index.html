@@ -180,6 +180,14 @@ Start several atbr servers and finally one (or several) atbr shard servers to ta
 
 </code></pre>
 
+<h3>Cost of running atbr on EC2</h3>
+<p>
+atbr runs in-memory, and costs for running e.g. an Amazon EC2 68.4GB ram instance is $1.80/hour. Assume the node has
+roughly 65GB available (after os components are loaded), this gives a Gigabyte-hour-cost of $0.027 and a Terabyte-hour-cost of
+1000*0.027 = $27. Since atbr is designed to hold only json key and values with metadata, and metadata can have pointers 
+to larger objects in disk-based storage (e.g. AWS S3) a Terabyte in-memory brings you very far. Monthly cost in this case would be $20412
+</p>
+
 
 <h3>What type of storage datastructure is used in atbr?</h3>
 
