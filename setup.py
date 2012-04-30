@@ -12,10 +12,14 @@ from distutils.core import setup, Extension
 from distutils.sysconfig import get_config_vars
 import os
 
-os.environ['CC'] = 'g++'
+#os.environ['CC'] = 'g++'
+os.environ['CC'] = 'c++'
 os.environ['CXX'] = 'g++'
 os.environ['CPP'] = 'g++'
 os.environ['LDSHARED'] = 'g++'
+
+#print os.environ.keys()
+#print os.environ.values()
 
 # remove erranous default parameter Wstrict-prototypes
 (opt,) = get_config_vars('OPT')
@@ -27,15 +31,15 @@ setup(
     name = "atbr",
     author = 'Amund Tveit', 
     author_email = 'amund@atbrox.com',
-    version = "0.1", 
+    version = "0.22", 
     ext_modules = [ 
         Extension( 
             "atbr._atbr",
             sources = ["atbr/atbrpy.i"],
             swig_opts=["-Wall","-c++"],
-            libraries=['rt','python2.6'],
-            include_dirs = ['/usr/include/python2.6'],
-            extra_compile_args = ['-std=c++0x'],
+            libraries=['python2.7'],
+            include_dirs = ['/usr/include/python2.7'],
+            extra_compile_args = ['-std=c++0x','-Wself-assign','-Wunused-variable'],
             extra_link_args = ['-shared'],
             language=["c++"]
             ),

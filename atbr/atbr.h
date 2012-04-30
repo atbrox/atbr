@@ -1,28 +1,36 @@
 #ifndef ATBR_H
 #define ATBR_H
 
-#include <iostream>
-#include <string>
-#include <google/sparse_hash_map>
-#include <google/dense_hash_map>
-
 #include <stdio.h>
 #include <stdint.h>
 #include <time.h>
 #include <unistd.h>
-
-#include <cstdint>
-
+//#include <cstdint>
+#include <iostream>
+#include <string>
 using std::string;
+
+#ifdef SPARSE_MAP
+#include <google/sparse_hash_map>
 using google::sparse_hash_map;
+typedef sparse_hash_map<string, string> AtbrMapType;
+#elif DENSE_MAP
+#include <google/dense_hash_map>
 using google::dense_hash_map;
+typedef dense_hash_map<string, string> AtbrMapType;
+#else
+#include <tr1/unordered_map>
+using std::tr1::unordered_map;
+typedef unordered_map<string, string> AtbrMapType;
+#endif
+
 
   class Atbr {
   public:
   Atbr() {
-#ifndef SPARSE_MAP
+#ifdef DENSE_MAP
     // only needed for dense_hash_map
-      storage.set_empty_key("ATBROX_EMPTY_KEY"); 
+    storage.set_empty_key("ATBROX_EMPTY_KEY"); 
 #endif
     }
 
@@ -58,9 +66,11 @@ using google::dense_hash_map;
 
       unsigned long size_before = size();
       unsigned long totsize = 0;
-      struct timespec start, stop;
 
+#ifndef __APPLE__
+      struct timespec start, stop;
       clock_gettime(CLOCK_MONOTONIC, &start);
+#endif
 
       FILE* fp = fopen(filename, "r");
       if(fp)
@@ -85,7 +95,8 @@ using google::dense_hash_map;
 	  }
 	}
       fclose(fp);
-      
+
+#ifndef __APPLE__      
       clock_gettime(CLOCK_MONOTONIC, &stop);
 
       unsigned long size_after = size();
@@ -95,6 +106,7 @@ using google::dense_hash_map;
       printf("Num new key-value pairs = %ld\n", (size_after-size_before));
       printf("Speed: %f key-value pairs per second\n", (size_after-size_before)/second_diff);
       printf("Throughput: %f MB per second\n", (totsize/(1024*1024.0))/second_diff);
+#endif
     }
 
 
@@ -106,15 +118,8 @@ using google::dense_hash_map;
     const static unsigned int LINE_BUFFER_SIZE = 128*1024;
     char linebuffer[LINE_BUFFER_SIZE]; // 
     const static unsigned int FILE_BUFFER_SIZE = 128*1024;
-#ifndef SPARSE_MAP
-    dense_hash_map<string, string> storage;
-    dense_hash_map<string, string>::iterator it;
-    //const char* hash_type = "dense";
-#else
-    sparse_hash_map<string, string> storage;
-    sparse_hash_map<string, string>::iterator it;
-    //const char* hash_type = "sparse";
-#endif
+    AtbrMapType storage;
+    AtbrMapType::iterator it;
   };
 
 #endif
