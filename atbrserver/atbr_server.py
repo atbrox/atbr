@@ -3,10 +3,10 @@ __author__ = 'amund'
 import tornado.web
 import tornado.websocket
 import os
-import atbr
+import atbr.atbr
 import logging
 
-key_value_store = atbr.Atbr()
+key_value_store = atbr.atbr.Atbr()
 
 class AtbrGetHttpHandler(tornado.web.RequestHandler):
     def get(self, key):
@@ -33,7 +33,7 @@ class AtbrGetWebsocketHandler(tornado.websocket.WebSocketHandler):
     def on_close(self):
         pass
 
-class AtbrPutHandler(tornado.web.RequestHandler):
+class AtbrPutHttpHandler(tornado.web.RequestHandler):
     def get(self, key, value):
         try:
             assert key and type(key) == unicode
@@ -59,7 +59,7 @@ class AtbrPutWebsocketHandler(tornado.websocket.WebSocketHandler):
     def on_close(self):
         pass
 
-class AtbrLoadHandler(tornado.web.RequestHandler):
+class AtbrLoadHttpHandler(tornado.web.RequestHandler):
     def get(self, filename):
         try:
             assert filename and type(filename) == unicode
@@ -84,6 +84,31 @@ class AtbrLoadWebsocketHandler(tornado.websocket.WebSocketHandler):
     def on_close(self):
         pass
 
+class AtbrSaveHttpHandler(tornado.web.RequestHandler):
+    def get(self, filename):
+        try:
+            assert filename and type(filename) == unicode
+            global key_value_store
+            filename = str(filename)
+            key_value_store.save(filename)
+        except Exception, e:
+            logging.error([e])
+
+class AtbrSaveWebsocketHandler(tornado.websocket.WebSocketHandler):
+    def __init__(self, application, request):
+        tornado.websocket.WebSocketHandler.__init__(self, application, request)
+
+    def on_message(self, message):
+        try:
+            filename = str(message)
+            global key_value_store
+            key_value_store.save(filename)
+        except Exception, e:
+            logging.error([e])
+
+    def on_close(self):
+        pass
+
 def main():
     settings = {
         "static_path": os.path.join(os.path.dirname(__file__), "static"),
@@ -94,11 +119,13 @@ def main():
 
     application = tornado.web.Application([
         (r'/get/key/(.*)', AtbrGetHttpHandler),
-        (r'/put/key/(.*)/value/(.*)', AtbrPutHandler),
-        (r'/load/(.*)', AtbrLoadHandler),
+        (r'/put/key/(.*)/value/(.*)', AtbrPutHttpHandler),
+        (r'/load/(.*)', AtbrLoadHttpHandler),
+        (r'/save/(.*)', AtbrSaveHttpHandler),
         (r'/getws/', AtbrGetWebsocketHandler),
         (r'/putws/', AtbrPutWebsocketHandler),
         (r'/loadws/', AtbrLoadWebsocketHandler),
+        (r'/savews/', AtbrSaveWebsocketHandler),
 
     ], **settings)
 

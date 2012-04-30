@@ -47,10 +47,12 @@ typedef unordered_map<string, string> AtbrMapType;
       return (const char*) "";
     }
     
-    void put(const char* key, const char* value) {
+    bool put(const char* key, const char* value) {
       string skey = string(key);
       string svalue = string(value);
       storage[key] = value;
+      // do a lookup and compare to check that it was stored
+      return svalue.compare(storage[key]) == 0;
     }
     
     bool exists(const char* key) {
@@ -60,6 +62,24 @@ typedef unordered_map<string, string> AtbrMapType;
     
     unsigned long size() {
       return storage.size();
+    }
+
+    unsigned long save(const char* filename) {
+      FILE* fp = fopen(filename, "w");
+      unsigned long i = 0;
+      if(fp) {
+	for(auto& kv: storage) {
+	  snprintf(linebuffer, LINE_BUFFER_SIZE, "%s\t%s\n", 
+		   kv.first.c_str(), kv.second.c_str());
+      //for(it = storage.begin(); it != storage.end(); ++it) {
+      //  snprintf(linebuffer, LINE_BUFFER_SIZE, "%s\t%s\n", 
+      //it->first.c_str(), it->second.c_str());
+	  ++i;
+	  fputs(linebuffer, fp);
+	}
+	fclose(fp);
+      }
+      return i;
     }
     
     void load(const char* filename) {

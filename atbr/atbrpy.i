@@ -17,9 +17,10 @@ class Atbr {
   Atbr();
   unsigned long size();
   const char* get(const char* key);
-  void put(const char* key, const char* value);
+  bool put(const char* key, const char* value);
   bool exists(const char* key); // wstring key?
   void load(const char* filename);
+  unsigned long save(const char* filename);
 };
 
 
