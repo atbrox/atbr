@@ -11,8 +11,6 @@ large-scale in-memory key-value pair store for Python
 
     2) Gigabyte+-size Python dictionaries are slow to fill
 
-    3) Gigabyte+-size Python dictionaries are not fun to use
-
     4) Gigabyte+-size dictionaries are fun to use
 
     5) atbr is fast - using C++-based key-value store
