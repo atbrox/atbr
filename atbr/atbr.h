@@ -68,12 +68,15 @@ typedef unordered_map<string, string> AtbrMapType;
       FILE* fp = fopen(filename, "w");
       unsigned long i = 0;
       if(fp) {
+#ifdef __APPLE__
 	for(auto& kv: storage) {
 	  snprintf(linebuffer, LINE_BUFFER_SIZE, "%s\t%s\n", 
 		   kv.first.c_str(), kv.second.c_str());
-      //for(it = storage.begin(); it != storage.end(); ++it) {
-      //  snprintf(linebuffer, LINE_BUFFER_SIZE, "%s\t%s\n", 
-      //it->first.c_str(), it->second.c_str());
+#else
+	  for(it = storage.begin(); it != storage.end(); ++it) {
+	    snprintf(linebuffer, LINE_BUFFER_SIZE, "%s\t%s\n", 
+		     it->first.c_str(), it->second.c_str());
+#endif
 	  ++i;
 	  fputs(linebuffer, fp);
 	}

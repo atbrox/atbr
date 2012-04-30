@@ -12,10 +12,8 @@ from distutils.core import setup, Extension
 from distutils.sysconfig import get_config_vars
 import os
 
-python_version = "2.6"
-
-os.environ['CC'] = 'g++'
-#os.environ['CC'] = 'c++'
+#os.environ['CC'] = 'g++'
+os.environ['CC'] = 'c++'
 os.environ['CXX'] = 'g++'
 os.environ['CPP'] = 'g++'
 os.environ['LDSHARED'] = 'g++'
@@ -39,11 +37,10 @@ setup(
             "atbr._atbr",
             sources = ["atbr/atbrpy.i"],
             swig_opts=["-Wall","-c++"],
-            libraries=['python%s' % (python_version)],
-            include_dirs = ['/usr/include/python%s' % (python_version)],
-    #        extra_compile_args = ['-std=c++0x','-Wself-assign','-Wunused-variable'],
-            extra_compile_args = ['-std=c++0x','-DSPARSE_MAP'],
-            extra_link_args = ['-shared', '-lrt'],
+            libraries=['python2.7'],
+            include_dirs = ['/usr/include/python2.7'],
+            extra_compile_args = ['-std=c++0x','-Wself-assign','-Wunused-variable'],
+            extra_link_args = ['-shared'],
             language=["c++"]
             ),
         ],
