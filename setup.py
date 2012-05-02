@@ -12,6 +12,9 @@ from distutils.core import setup, Extension
 from distutils.sysconfig import get_config_vars
 import os
 
+def read(fname):
+    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
 python_version = "2.6"
 
 os.environ['CC'] = 'g++'
@@ -34,8 +37,9 @@ setup(
     author = 'Amund Tveit', 
     author_email = 'amund@atbrox.com',
     description = ("low-latency and memory-efficient key-value store"),
-    version = "0.22", 
-    licence = "Apache",
+    long_description=read('FEATURES'),
+    version = "0.23", 
+    license = "Apache License 2.0",
     url = "http://atbr.atbrox.com",
     ext_modules = [ 
         Extension( 
@@ -50,5 +54,5 @@ setup(
             language=["c++"]
             ),
         ],
-    packages=['atbr', 'atbrserver']
+    packages=['atbr', 'atbrserver', 'atbrthrift']
     )
