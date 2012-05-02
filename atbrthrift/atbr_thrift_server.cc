@@ -15,19 +15,29 @@ using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::server;
 
 using boost::shared_ptr;
+using namespace com::atbrox::atbr;
 
 class AtbrStorageHandler : virtual public AtbrStorageIf {
  public:
   AtbrStorageHandler() {
     // Your initialization goes here
-    Atbr storage;
   }
 
   void get(std::string& _return, const std::string& key) {
     // Your implementation goes here
-    printf("get\n");
+    if(storage.exists(key.c_str())) {
+      _return = string(storage.get(key.c_str()));
+      }
   }
 
+  void load(const std::string& filename) {
+    // Your implementation goes here
+    printf("load\n");
+    storage.load(filename.c_str());
+  }
+
+  private:
+      Atbr storage;
 };
 
 int main(int argc, char **argv) {

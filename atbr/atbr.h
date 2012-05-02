@@ -5,6 +5,9 @@
 #include <stdint.h>
 #include <time.h>
 #include <unistd.h>
+#ifndef __APPLE__
+#include <cstring>
+#endif
 //#include <cstdint>
 #include <iostream>
 #include <string>
