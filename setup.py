@@ -33,7 +33,10 @@ setup(
     name = "atbr",
     author = 'Amund Tveit', 
     author_email = 'amund@atbrox.com',
+    description = ("low-latency and memory-efficient key-value store"),
     version = "0.22", 
+    licence = "Apache",
+    url = "http://atbr.atbrox.com",
     ext_modules = [ 
         Extension( 
             "atbr._atbr",

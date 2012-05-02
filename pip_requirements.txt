@@ -1,5 +1,6 @@
-websocket-client
 boto
+thrift
 tornado
+websocket-client
 zc-zookeeper-static
 zc.zk
