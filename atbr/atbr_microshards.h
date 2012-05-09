@@ -86,7 +86,11 @@ public:
     }
     
     unsigned long size() {
-        return storage.size();
+        int totsize = 0;
+        for(int i=0; i<num_microshards; ++i) {
+            totsize += microshards[i].size();
+        }
+        return totsize;
     }
     
     
