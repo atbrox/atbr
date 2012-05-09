@@ -6,6 +6,9 @@ import os
 import atbr.atbr
 import logging
 import sys
+import thread
+import threading
+import time
 
 key_value_store = atbr.atbr.Atbr()
 
@@ -109,46 +112,77 @@ class AtbrSaveWebsocketHandler(tornado.websocket.WebSocketHandler):
     def on_close(self):
         pass
 
+class AtbrZookeeperHandler(tornado.websocket.WebSocketHandler):
+    def __init__(self):
+        pass
 
-def init_tornado(port_number):
-    settings = {
-        "static_path": os.path.join(os.path.dirname(__file__), "static"),
-        "cookie_secret": "lkjsdflkjdslkjsdflkjsdlfkjslkjfdslkjfjds",
-        #"login_url": "/login",
-        "xsrf_cookies": False
-    }
-    application = tornado.web.Application([
-        (r'/get/key/(.*)', AtbrGetHttpHandler),
-        (r'/put/key/(.*)/value/(.*)', AtbrPutHttpHandler),
-        (r'/load/(.*)', AtbrLoadHttpHandler),
-        (r'/save/(.*)', AtbrSaveHttpHandler),
-        (r'/getws/', AtbrGetWebsocketHandler),
-        (r'/putws/', AtbrPutWebsocketHandler),
-        (r'/loadws/', AtbrLoadWebsocketHandler),
-        (r'/savews/', AtbrSaveWebsocketHandler),
+    def on_message(self, message):
+        # initialize connect
+        pass
 
-    ], **settings)
-    application.listen(port_number)
-    tornado.ioloop.IOLoop.instance().start()
+    def on_close(self):
+        pass
 
-def main(argv):
-    try:
-        if len(argv) == 1:
-            port_number = 8888
-            init_tornado(port_number)
-        else:
-            port_number = int(argv[1])
-            input_files = argv[2:]
+class LookForWorkThread(threading.Thread):
+    def __init__(self, zookeepers):
+        self.zookeepers = zookeepers
+        threading.Thread.__init__ ( self )
 
-            # load files
-            print "Loading files"
-            for file_name in input_files:
-                key_value_store.load(file_name)
+    def run(self):
+            i = 0
+            while True:
+                print "i = ", i, self.zookeepers
+                time.sleep(4)
+                i += 1
 
-            init_tornado(port_number)
-    except Exception, e:
-        print "Error: ", e
-        print "Usage: python %s <port_number> <input_file_1> .. <input_file_n>"
+
+class AtbrWebSocketServer:
+
+    def init_tornado(self,port_number):
+        self.settings = {
+            "static_path": os.path.join(os.path.dirname(__file__), "static"),
+            "cookie_secret": "lkjsdflkjdslkjsdflkjsdlfkjslkjfdslkjfjds",
+            #"login_url": "/login",
+            "xsrf_cookies": False
+        }
+        self.application = tornado.web.Application([
+            (r'/get/key/(.*)', AtbrGetHttpHandler),
+            (r'/put/key/(.*)/value/(.*)', AtbrPutHttpHandler),
+            (r'/load/(.*)', AtbrLoadHttpHandler),
+            (r'/save/(.*)', AtbrSaveHttpHandler),
+            (r'/getws/', AtbrGetWebsocketHandler),
+            (r'/putws/', AtbrPutWebsocketHandler),
+            (r'/loadws/', AtbrLoadWebsocketHandler),
+            (r'/savews/', AtbrSaveWebsocketHandler),
+
+        ], **self.settings)
+        self.application.listen(port_number)
+        print "before"
+        zookeepers = ("zk1", "zk2")
+        self.zkthread = LookForWorkThread(zookeepers)
+        self.zkthread.start()
+        tornado.ioloop.IOLoop.instance().start()
+        print "after"
+
+    def main(self,argv):
+        try:
+            if len(argv) == 1:
+                port_number = 8888
+                self.init_tornado(port_number)
+            else:
+                port_number = int(argv[1])
+                input_files = argv[2:]
+
+                # load files
+                print "Loading files"
+                for file_name in input_files:
+                    key_value_store.load(file_name)
+
+                self.init_tornado(port_number)
+        except Exception, e:
+            print "Error: ", e
+            print "Usage: python %s <port_number> <input_file_1> .. <input_file_n>"
 
 if __name__ == "__main__":
-    main(sys.argv)
+    atbr_websocket_server = AtbrWebSocketServer()
+    atbr_websocket_server.main(sys.argv)

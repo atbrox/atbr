@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <unistd.h>
-#include <mutex>
+//#include <mutex> // not working on llvm
 #ifndef __APPLE__
 #include <cstring>
 #endif
@@ -82,7 +82,7 @@ public:
     bool exists(const char* key) {
         string skey = string(key);
         it = microshards[shardfunction(skey)].find(skey);
-        return it != microshards[shardfunction].end();
+        return it != microshards[shardfunction(skey)].end();
     }
     
     unsigned long size() {
@@ -99,6 +99,14 @@ public:
         unsigned long i = 0;
         if(fp) {
 #ifdef __APPLE__
+            for(int i=0; i<num_microshards; ++i) {
+                // TODO: support sharding 
+                for(auto&kv: microshards[i]) {
+                    snprintf(linebuffer, LINE_BUFFER_SIZE, "%s\t%s\n", 
+                             kv.first.c_str(), kv.second.c_str());
+
+                }
+            }
             for(auto& kv: storage) {
                 snprintf(linebuffer, LINE_BUFFER_SIZE, "%s\t%s\n", 
                          kv.first.c_str(), kv.second.c_str());
@@ -142,7 +150,10 @@ public:
                         // TODO: replace with a get method that uses microshards.
                         // can then have separate threads that imports into same
                         // structure. perhaps use a threadpool.
-                        storage[skey] = svalue; 
+                        //storage[skey] = svalue; 
+                        
+                        printf("shard = %d\n", shardfunction(skey));
+                        microshards[shardfunction(skey)][skey] = svalue;
                     }
                 }
             }
@@ -171,7 +182,7 @@ public:
         AtbrMapType storage;
         AtbrMapType::iterator it;
         AtbrMapType* microshards;
-	std::timed_mutex microshard_mutexes;
+	//std::timed_mutex microshard_mutexes;
         int num_microshards;
     };
     
