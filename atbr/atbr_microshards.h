@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <unistd.h>
+#include <mutex>
 #ifndef __APPLE__
 #include <cstring>
 #endif
@@ -41,11 +42,18 @@ public:
 #endif
 	num_microshards = 1;
 	microshards = new AtbrMapType[num_microshards];
+	for(int i=0;i<num_microshards;++i) {
+	  
+	}
     }
     
     Atbr(int num_microshards) : num_microshards(num_microshards) {
         assert(num_microshards > 0);
         microshards = new AtbrMapType[num_microshards];
+	int sizes = 0;
+	for(int i=0;i<num_microshards;++i) {
+	  sizes += microshards[i].size();
+	}
     }
 
     
@@ -55,7 +63,8 @@ public:
     
     const char* get(const char* key) {
         string skey = string(key);
-        it = storage.find(skey);
+
+        it = microshards[shardfunction(skey)].find(skey);
         if(it!=storage.end()) {
             return it->second.c_str();
         }
@@ -65,14 +74,15 @@ public:
     bool put(const char* key, const char* value) {
         string skey = string(key);
         string svalue = string(value);
-        storage[key] = value;
+        microshards[shardfunction(skey)][key] = value;
         // do a lookup and compare to check that it was stored
-        return svalue.compare(storage[key]) == 0;
+        return svalue.compare(microshards[shardfunction(skey)][key]) == 0;
     }
     
     bool exists(const char* key) {
         string skey = string(key);
-        return storage.find(skey) != storage.end();
+        it = microshards[shardfunction(skey)].find(skey);
+        return it != microshards[shardfunction].end();
     }
     
     unsigned long size() {
@@ -157,6 +167,7 @@ public:
         AtbrMapType storage;
         AtbrMapType::iterator it;
         AtbrMapType* microshards;
+	std::timed_mutex microshard_mutexes;
         int num_microshards;
     };
     
