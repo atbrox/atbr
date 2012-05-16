@@ -83,19 +83,30 @@ print "storage per year in terabytes = %d - RAM cost (per day) %f kUSD - RAM cos
 
 token_key_overhead = 2.0/8
 num_tokens_in_index = num_tweets_per_day*avg_num_unique_tokens
-index_size_per_day = num_tokens_in_index*(avg_token_length + token_key_overhead) + num_tokens_in_index*64/8 # only one entry
-index_size_per_week = num_tokens_in_index*(avg_token_length + token_key_overhead) + num_tokens_in_index*7*64/8 # 
-index_size_per_month = num_tokens_in_index*(avg_token_length + token_key_overhead) + num_tokens_in_index*31*64/8 # 
-index_size_per_year = num_tokens_in_index*(avg_token_length + token_key_overhead) + num_tokens_in_index*365*64/8 # 
+
+# each tweet provides an update to avg_num_unique_tokens entries in index
+
+key_contribution = num_tokens_in_index*(avg_token_length + token_key_overhead)
+
+index_size_per_day = key_contribution + num_tweets_per_day*avg_num_unique_tokens*64/8
+index_size_per_week = key_contribution + num_tweets_per_day*avg_num_unique_tokens*7*64/8
+index_size_per_month = key_contribution + num_tweets_per_day*avg_num_unique_tokens*31*64/8
+index_size_per_year = key_contribution + num_tweets_per_day*avg_num_unique_tokens*365*64/8
 
 index_size_per_day_in_terabytes = index_size_per_day/(1024*1024*1024)
 index_size_per_week_in_terabytes = index_size_per_week/(1024*1024*1024)
 index_size_per_month_in_terabytes = index_size_per_month/(1024*1024*1024)
 index_size_per_year_in_terabytes = index_size_per_year/(1024*1024*1024)
 
+# assuming slightly better encoding of posting lists, e.g. average of 1 byte per entry would give
+better_encoded = index_size_per_year_in_terabytes/8
+
 print "index size per week in terabytes = %f - RAM-cost (per day) %f kUSD" % (index_size_per_week_in_terabytes, index_size_per_week_in_terabytes*ram_cost_USD_per_terabyte_day/1000)
 print "index size per month in terabytes = %f - RAM-cost (per day) %f kUSD" % (index_size_per_month_in_terabytes, index_size_per_month_in_terabytes*ram_cost_USD_per_terabyte_day/1000)
 print "index size per year in terabytes = %f - RAM-cost (per day) %f kUSD" % (index_size_per_year_in_terabytes, index_size_per_year_in_terabytes*ram_cost_USD_per_terabyte_day/1000)
+
+print "index size per year in terabytes (better encoding) = %f - RAM-cost (per day) %f kUSD" % (better_encoded, better_encoded*ram_cost_USD_per_terabyte_day/1000)
+
 
 
 
