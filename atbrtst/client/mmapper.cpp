@@ -44,14 +44,11 @@ using namespace std; // for string
  int random2 = distribution(engine); // Generate another sample directly using the distribution and the engine objects.
  */
 
-
 mmapper::mmapper(string filename, int cachesize, int address_byte_len) {
     line_buffer = new char[100000];
     address_buffer = new char[address_byte_len];
-    
     mmap_fp = fopen(filename.c_str(), "rb");
     assert(mmap_fp != NULL);
-    
     mmap_fd = fileno(mmap_fp);
     cerr << "mmap_fd = " << mmap_fd << endl;
     fseek(mmap_fp,0, SEEK_END);
@@ -62,14 +59,8 @@ mmapper::mmapper(string filename, int cachesize, int address_byte_len) {
     mmap_data = (char*) mmap(NULL, mmap_size, PROT_READ, MAP_SHARED, mmap_fd, mmap_start_offset);
     fclose(mmap_fp);
     cerr << "filename = " << filename << ", size = " << mmap_size << endl;
-    
     srand ( time(NULL) );
-    
-    
-    cerr << "after srand" << endl;
-    
     json_document = new rapidjson::Document();
-    
     if(cachesize > 0) {
         // read data from filename
         // and input into hashmap
@@ -78,7 +69,6 @@ mmapper::mmapper(string filename, int cachesize, int address_byte_len) {
         // and caching of first line, one could reduce the number of seeks
         // to 1 perhaps.
     }
-    
 }
 
 mmapper::~mmapper() {
@@ -87,8 +77,6 @@ mmapper::~mmapper() {
     delete json_document;
     munmap(mmap_data, mmap_size);
 }
-
-
 
 char mmapper::get(uint64_t pos) {
     if(pos >= mmap_size) {
@@ -115,44 +103,16 @@ string mmapper::search(string query, unsigned int startpos, int address_byte_len
     line_buffer[rlength] = '\0';
     
     string record = line_buffer;
-    
     int quote_start = address_byte_len + 1;
-    // strchr()
     int quote_end = record.find('"', quote_start+1);
-    
-    //cerr << "quote_start = " << quote_start << endl;
-    //cerr << "quote_end = " << quote_end << endl;
-    
-    //line_buffer[rlength] = '\0';
-    //printf("full record = '%s'\n", line_buffer);
-    
-    
-      
-    if(query.size() == 0) {
-        
-        //cerr << "//quote_start = " << quote_start << endl;
-        //cerr << "//quote_end = " << quote_end << endl;
 
-        // extract value, if there is one, and it should be since query is consumed.
-        // TODO: fix handling of queries that are empty to begin with
-               //printf("before returning '%s'\n", line_buffer);
-        //cerr << ".. = " << record.substr(quote_start, quote_end-quote_start) << endl;
-        
-        // TODO: use strdup and pure c instead of string
+    if(query.size() == 0) {
+      // TODO: use strdup and pure c instead of string
       return record.substr(quote_start+1, (quote_end-quote_start)-1);        
-        //return string(line_buffer);
-        }
-    
-    
-    
-    
+    }
       
     int curlybracketstart = quote_end + 3; // i.e. ", {
-    
-    
-    
-    //cerr << "curlybracketstart = " << curlybracketstart << endl;
-    
+
     if(curlybracketstart > 0 && curlybracketstart < rlength) {
         
         //printf("rlength = %d\n", rlength);
@@ -189,19 +149,13 @@ string mmapper::search(string query, unsigned int startpos, int address_byte_len
         for(int j=0; j<query_length; ++j) {
             tmpquery = '"' + query.substr(0,query_length-j) + '"';
             key_pos= record.find(tmpquery);
-            //printf("tmpquery='%s', res = %d\n", tmpquery.c_str(), key_pos);
             if(key_pos != -1) {
                 // find both quotes
-                //printf("tmpquery = '%s'\n", tmpquery.c_str());
                 value_quote_pos_start = record.find('"', key_pos+tmpquery.size()+1);
-                //printf("res quote = '%d'\n", value_quote_pos_start);
                 value_quote_pos_stop = record.find('"', value_quote_pos_start+1);
-                //printf("res quote2 = '%d'\n", value_quote_pos_stop);
-                //printf("..'%s'\n", record.substr(value_quote_pos_start+1, value_quote_pos_stop-value_quote_pos_start).c_str());
                 next_pos = atoi(record.substr(value_quote_pos_start+1, value_quote_pos_stop-value_quote_pos_start).c_str());
                /// printf("nextpos = '%d'\n", next_pos);
                 subquery = query.substr(query_length-j,query_length-tmpquery.size()+2);
-                //printf("subquery = '%s'\n", subquery.c_str());
                 has_result = true;
                 break;
 
