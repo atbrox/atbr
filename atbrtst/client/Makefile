@@ -15,4 +15,4 @@ mmapper.o: mmapper.cpp mmapper.h
 	$(CC) -O3 -I./include -c mmapper.cpp
 
 clean:
-	rm -f *.o atbr_disk_lookup
+	rm -f *.o atbr_lookup

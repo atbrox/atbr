@@ -13,11 +13,14 @@ num_digits_to_represent_blocks = 9 # int(math.log10(max_num_blocks)+1)
 global_block = 1  # need special first block
 zeroblock = "".join([str(0) for x in range(num_digits_to_represent_blocks)])
 
-def big_test():
+def big_test(argv,file_encoding="latin-1"):
+    filename = "../testdata/norwegian_words.txt"
+    if len(argv) > 1:
+        filename = argv[1]
     import codecs
     p2 = patricia()
     allwords = []
-    for line in codecs.open('../testdata/words.txt', encoding="latin-1"):
+    for line in codecs.open(filename, encoding=file_encoding):
         #print sys.stderr, "line = ", [line]
         word = line.strip()#.lower()
         allwords.append(word)
@@ -97,7 +100,7 @@ def sort_words(words):
 # THE CODE BELOW SERIOUSLY NEEDS REFACTORING AND CLEANUP
 if __name__ == "__main__":
     t0 = time.time()
-    data, allwords = big_test()
+    data, allwords = big_test(sys.argv)
     delta0 = time.time()-t0
     print >> sys.stderr, "DELTA = ", delta0
 
