@@ -38,7 +38,7 @@ setup(
     author_email = 'amund@atbrox.com',
     description = ("low-latency and memory-efficient key-value store"),
     long_description=read('FEATURES'),
-    version = "0.24", 
+    version = "0.30", 
     license = "Apache License 2.0",
     url = "http://atbr.atbrox.com",
     ext_modules = [ 
@@ -54,5 +54,5 @@ setup(
             language=["c++"]
             ),
         ],
-    packages=['atbr', 'atbrserver', 'atbrthrift']
+    packages=['atbr', 'atbrserver', 'atbrthrift','atbrtst','atbrtst.builder','atbrtst.client']
     )

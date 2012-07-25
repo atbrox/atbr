@@ -1,0 +1,77 @@
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/!svn/ver/64/trunk/include/rapidjson
+END
+encodings.h
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/49/trunk/include/rapidjson/encodings.h
+END
+rapidjson.h
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/57/trunk/include/rapidjson/rapidjson.h
+END
+filestream.h
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/27/trunk/include/rapidjson/filestream.h
+END
+writer.h
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/49/trunk/include/rapidjson/writer.h
+END
+encodedstream.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/50/trunk/include/rapidjson/encodedstream.h
+END
+document.h
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/64/trunk/include/rapidjson/document.h
+END
+stringbuffer.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/46/trunk/include/rapidjson/stringbuffer.h
+END
+reader.h
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/59/trunk/include/rapidjson/reader.h
+END
+allocators.h
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/57/trunk/include/rapidjson/allocators.h
+END
+prettywriter.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/49/trunk/include/rapidjson/prettywriter.h
+END
+filewritestream.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/23/trunk/include/rapidjson/filewritestream.h
+END
+filereadstream.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/49/trunk/include/rapidjson/filereadstream.h
+END
