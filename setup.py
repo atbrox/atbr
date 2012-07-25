@@ -54,5 +54,5 @@ setup(
             language=["c++"]
             ),
         ],
-    packages=['atbr', 'atbrserver', 'atbrthrift','atbrtst']
+    packages=['atbr', 'atbrserver', 'atbrthrift','atbrtst','atbrtst.builder','atbrtst.client']
     )
