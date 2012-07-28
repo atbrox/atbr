@@ -93,7 +93,7 @@ char mmapper::get_random(){
 }
 
 string mmapper::search(string query, unsigned int startpos, int address_byte_len) {
-  //printf(" ==> search(query='%s', startpos='%d', abl='%d'\n", query.c_str(), startpos, address_byte_len);
+  printf(" ==> search(query='%s', startpos='%d', abl='%d'\n", query.c_str(), startpos, address_byte_len);
     unsigned int rlength;// 64bit??
 
     //char buff[address_byte_len];

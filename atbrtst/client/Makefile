@@ -1,18 +1,22 @@
-#CC=clang++ # or g++
-CC=g++ # or g++
-#MACARGS=-framework CoreServices
-MACARGS=
+CC=clang++ # or g++
+
+#CC=g++ # or g++
+EXTRAARGS=-framework CoreServices
+#MACARGS=
 
 all: atbr_lookup
 
 atbr_lookup: disk_or_ssd_lookup.o mmapper.o
-	$(CC) -O3 -I./include -o atbr_lookup disk_or_ssd_lookup.o mmapper.o $(MACARGS)
+	$(CC) -O3 -v -ftime-report -I./include -o atbr_lookup disk_or_ssd_lookup.o mmapper.o $(EXTRAARGS)
 
 disk_or_ssd_lookup.o: disk_or_ssd_lookup.cpp *.h
-	$(CC) -O3 -I./include -c disk_or_ssd_lookup.cpp
+	$(CC) -O3 -v -ftime-report -I./include -c disk_or_ssd_lookup.cpp
 
 mmapper.o: mmapper.cpp mmapper.h
-	$(CC) -O3 -I./include -c mmapper.cpp
+	$(CC) -O3 -v -ftime-report -I./include -c mmapper.cpp
+
+stringperformancetest: stringperformancetest.cpp
+	$(CC) stringperformancetest.cpp -o stringperformancetest
 
 clean:
 	rm -f *.o atbr_lookup
