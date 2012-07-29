@@ -19,6 +19,7 @@ extern "C" {
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <sys/time.h>
+#include <string.h>
 }
 #include "mmapper.h"
 
@@ -93,9 +94,8 @@ char mmapper::get_random(){
 }
 
 string mmapper::search(string query, unsigned int startpos, int address_byte_len) {
-  printf(" ==> search(query='%s', startpos='%d', abl='%d'\n", query.c_str(), startpos, address_byte_len);
+  //printf(" ==> search(query='%s', startpos='%d', abl='%d'\n", query.c_str(), startpos, address_byte_len);
     unsigned int rlength;// 64bit??
-
     //char buff[address_byte_len];
     memcpy(address_buffer, mmap_data + startpos, address_byte_len);
     rlength = atoi(address_buffer);
@@ -107,41 +107,17 @@ string mmapper::search(string query, unsigned int startpos, int address_byte_len
     int quote_end = record.find('"', quote_start+1);
 
     if(query.size() == 0) {
-      // TODO: use strdup and pure c instead of string
-      return record.substr(quote_start+1, (quote_end-quote_start)-1);        
+        return record.substr(quote_start+1, (quote_end-quote_start)-1);        
     }
       
     int curlybracketstart = quote_end + 3; // i.e. ", {
 
     if(curlybracketstart > 0 && curlybracketstart < rlength) {
-        
-        //printf("rlength = %d\n", rlength);
-        //memcpy(line_buffer, mmap_data+curlybracketstart+startpos, rlength-curlybracketstart);
-        //line_buffer[rlength-curlybracketstart] = '\0';
-        //printf("jsona = '%s'\n", line_buffer);
-        
-        //line_buffer[rlength-curlybracketstart-2] = '\0';
-        
-        
-        
-        //printf("json = '%s'\n", record.substr(curlybracketstart,rlength-curlybracketstart-2).c_str());
-        
-        // "\u00f2g": "000466784", "
-        
-        /////int res = json_document->Parse<0>(record.substr(curlybracketstart,rlength-curlybracketstart-2).c_str()).HasParseError();
-        //printf("parsing result = %d\n", res);
-        
-        //assert(json_document->IsObject());
-        
-        
-        //printf("parsing went fine\n");
-        
         bool has_result = false;
         int next_pos = -1;
         string subquery = "";
         int query_length = query.size();
         string tmpquery;
-        
         int key_pos = -1;
         int value_quote_pos_start = -1;
         int value_quote_pos_stop = -1;
@@ -154,31 +130,14 @@ string mmapper::search(string query, unsigned int startpos, int address_byte_len
                 value_quote_pos_start = record.find('"', key_pos+tmpquery.size()+1);
                 value_quote_pos_stop = record.find('"', value_quote_pos_start+1);
                 next_pos = atoi(record.substr(value_quote_pos_start+1, value_quote_pos_stop-value_quote_pos_start).c_str());
-               /// printf("nextpos = '%d'\n", next_pos);
                 subquery = query.substr(query_length-j,query_length-tmpquery.size()+2);
                 has_result = true;
                 break;
 
             }
-            /*
-            //cerr << tmpquery << endl;
-            if(json_document->HasMember(tmpquery.c_str())) {
-                //printf("yo!\n");
-                rapidjson::Document & jdoc = *json_document;
-                //jdoc = *json_document;
-                
-                string value = jdoc[tmpquery.c_str()].GetString();
-                //cerr << "value = " << value << endl;
-                has_result = true;
-                next_pos = atoi(value.c_str());
-                subquery = query.substr(query_length-j,query_length-tmpquery.size()); 
-                break;
-            }
-             */
         }
         
         if(has_result) {
-            //printf("recursive call, tmpquery = '%s'\n",  subquery.c_str());
             return search(subquery, next_pos, address_byte_len);
         } else {
             return string("<empty>");
@@ -187,6 +146,70 @@ string mmapper::search(string query, unsigned int startpos, int address_byte_len
     }
     
     return string("<empty>");
+}
+
+
+
+char* mmapper::newsearch(const char* query, unsigned int startpos, int address_byte_len) {
+    //const char* cquery = query.c_str(); // strdup?
+
+    //printf(" ==> newsearch(query='%s', startpos='%d', abl='%d'\n", query, startpos, address_byte_len);
+    int query_length = strlen(query); // query.size();    
+    memcpy(address_buffer, mmap_data + startpos, address_byte_len);
+    unsigned int rlength = atoi(address_buffer);
+    memcpy(line_buffer, mmap_data+startpos, rlength);
+    line_buffer[rlength] = '\0';
+    char* crecord = line_buffer;
+    int quote_start = address_byte_len + 1;
+    int quote_end = index(crecord + quote_start+1, '"') - crecord;
+        
+    if(query_length == 0) {
+        return strndup(crecord + quote_start+1, (quote_end-quote_start)-1);
+    }
+    
+    int curlybracketstart = quote_end + 3; // i.e. ", {
+    
+    if(curlybracketstart > 0 && curlybracketstart < rlength) {
+        bool has_result = false;
+        int next_pos = -1;
+        
+        char* strstr_result = NULL;
+        char ctmpquery[100];
+        char next_query[100];
+        int key_pos = -1;
+        int value_quote_pos_start = -1;
+        int value_quote_pos_stop = -1;
+        
+        for(int j=0; j<query_length; ++j) {            
+            ctmpquery[0] = '"';
+            ctmpquery[query_length-j+1] = '"';
+            ctmpquery[query_length-j+2] = '\0';
+            memcpy( ctmpquery+1, query, query_length-j);
+            strstr_result= strstr(crecord, ctmpquery);
+            if(strstr_result != NULL) {
+                key_pos = strstr_result-crecord;
+                // find both quotes
+                value_quote_pos_start = index(crecord + key_pos + query_length-j+2 + 1, '"') - crecord; // not needing strlen
+                value_quote_pos_stop = index(crecord+value_quote_pos_start+1, '"' ) - crecord;
+                next_pos = atoi( strncpy(next_query, crecord + value_quote_pos_start + 1, value_quote_pos_stop-value_quote_pos_start) );
+                strncpy(next_query, query+query_length-j, query_length-(query_length-j+2)+2);
+                next_query[query_length-(query_length-j+2)+2] = '\0';
+                has_result = true;
+                break;
+            }
+        }
+        
+        if(has_result) {
+            return newsearch(next_query, next_pos, address_byte_len);
+        } else {
+            return "<empty>";
+            //return string("<empty>");
+        }
+        
+    }
+    
+    return "<empty>";
+
 }
 
 

@@ -91,7 +91,8 @@ int main(int argc, const char * argv[])
     
     string query = argv[2];
     cerr << "query = " << query << endl;
-    string result;
+    char* result = "";
+    string res;
 
 #ifdef __APPLE__
     start_t = mach_absolute_time();
@@ -99,7 +100,10 @@ int main(int argc, const char * argv[])
     gettimeofday(&start_time, NULL);
 #endif // __APPLE__
     
-    result = mymmapper.search(query, 0);
+    //res = mymmapper.search(query, 0);
+    //cerr << "r = " << result << endl;
+    result = mymmapper.newsearch(query.c_str(), 0);
+    //cerr << "r2 = " << res << endl;
     
 #ifdef __APPLE__    
     stop_t = mach_absolute_time();
@@ -115,6 +119,7 @@ int main(int argc, const char * argv[])
 #endif // __APPLE__
     
     cerr << "result = " << result << endl;
+    cerr << "res = " << res << endl;
 
     std::cerr << "Query time in microseconds = " << elapsed_microsec << endl;
     // insert code here...

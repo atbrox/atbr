@@ -26,6 +26,7 @@ public:
     inline char get(uint64_t pos);
     char get_random();
     string search(string query, unsigned int startpos, int address_byte_len=9);
+    char* newsearch(const char* query, unsigned int startpos, int address_byte_len=9);
 
  protected:
     FILE* get_fh() {  return mmap_fp; }
