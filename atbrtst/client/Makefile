@@ -1,7 +1,7 @@
 CC=clang++ # or g++
 
 #CC=g++ # or g++
-EXTRAARGS=-framework CoreServices
+EXTRAARGS=-framework CoreServices -Wc++11-extensions
 #MACARGS=
 
 all: atbr_lookup

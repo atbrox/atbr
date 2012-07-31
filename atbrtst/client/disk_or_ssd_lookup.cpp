@@ -6,11 +6,15 @@
 //  Copyright (c) 2012 Atbrox. All rights reserved.
 //
 
+#include <vector>
 #include <iostream>
 #include <string>
 #include <sys/time.h>
 #include <memory.h>
+#include <string.h> // strtok
 #include <unistd.h>
+#include <queue>
+#include <tr1/unordered_map>
 
 #include "mmapper.h"
 
@@ -20,9 +24,24 @@
 #include <mach/mach_time.h>
 #endif // __APPLE__
 
+using std::priority_queue;
 using std::string;
+using std::vector;
+using std::tr1::unordered_map;
 using std::endl;
 using std::cerr;
+using namespace std;
+
+template< typename FirstType, typename SecondType >
+struct MyPairComparator {
+    bool operator()( const pair<FirstType, SecondType>& p1, const pair<FirstType, SecondType>& p2 ) const
+    {  if( p1.first < p2.first ) return true;
+        if( p2.first < p1.first ) return false;
+        if(p2.first == p1.first) return (p2.second < p1.second);
+        //return p1.second < p2.second;
+    }
+};
+
 
 #ifdef __APPLE__
 uint64_t GetPIDTimeInNanoseconds(void)
@@ -61,7 +80,109 @@ uint64_t GetPIDTimeInNanoseconds(void)
     
     return * (uint64_t *) &elapsedNano;
 }
-#endif // __APPLE__
+#endif // __APPLE__ 
+
+vector<string>* tokenize_query(char* query) {
+    assert(query != NULL);
+    vector<string>* query_terms = new vector<string>();
+    char* token, *querycopy, *tofree;
+    
+    tofree = querycopy = strdup(query);
+    
+    while ((token = strsep(&querycopy, " ")) != NULL) {
+        query_terms->push_back(string(token));
+    }
+    
+    delete [] tofree;
+    return query_terms;
+}
+
+vector<int>* tokenize_result(char** result, unordered_map<int, int> & uri_to_frequency) {
+    vector<int>* results = new vector<int>();
+    char* token, *resultcopy, *tofree;
+    unordered_map<int, int>::iterator it;
+    int uri;
+
+    while((token = strsep(result, ",")) != NULL) {
+        uri = atoi(token);
+        // update map counter
+        it = uri_to_frequency.find(uri);
+        if(it == uri_to_frequency.end()) {
+            uri_to_frequency[uri] = 0;
+        } // TODO: break off when enough unique terms with > N results.
+        ++uri_to_frequency[uri];
+    }
+    
+    delete [] tofree;
+    return results;
+}
+
+priority_queue<int>* rank_results(vector<char*>& results) {
+    
+       
+    priority_queue<pair<int, int>, vector<pair<int, int> >, MyPairComparator<int,int> > q;
+
+    
+    priority_queue<int>* ranked_results = new priority_queue<int>();
+    
+    unordered_map<int, int> uri_to_frequency;
+    
+    // iterate and tokenize each result, and
+    for(char* result: results) {
+        tokenize_result(&result, uri_to_frequency);
+        
+        // TODO: break off
+    }
+    
+    for(std::pair<const int,int> it: uri_to_frequency) {
+        cerr << "uri = " << it.first << ", " << it.second << endl;
+        if(it.second > 1) {
+            ranked_results->push(it.first);
+            q.push(make_pair(it.second, it.first));
+        }
+    }
+    
+    // TODO: update priority queue, or do it incrementally in loop above.
+    
+    while(!q.empty()) {
+        cerr << q.top().second << "freq = " << q.top().first << endl;
+        q.pop();
+    }
+    
+    return ranked_results;
+}
+
+
+
+int query_and_merge(char* query, mmapper & index) {
+    
+    vector<string>* query_terms = tokenize_query(query);
+    vector<char*> results;
+    
+    char* result;
+    for(string query_term: *query_terms) {
+        result = index.newsearch(query_term.c_str(), 0);
+        results.push_back(result);
+    }
+    
+    priority_queue<int>* ranked_results = rank_results(results);
+    
+    cerr << "Ranked results" << endl;
+    
+    while(!ranked_results->empty()) {
+        cerr << "uri = " << ranked_results->top() << endl;
+        ranked_results->pop();
+    }
+    
+    
+    
+    
+    delete ranked_results;
+    delete query_terms;
+    
+    return 0;
+        
+}
 
 int main(int argc, const char * argv[])
 {
@@ -119,9 +240,14 @@ int main(int argc, const char * argv[])
 #endif // __APPLE__
     
     cerr << "result = " << result << endl;
+    
+    // TODO: use strtok, and then merge using hash_map or something
+    
     cerr << "res = " << res << endl;
 
     std::cerr << "Query time in microseconds = " << elapsed_microsec << endl;
+    
+    query_and_merge("foo atbr nasse amund", mymmapper);
     // insert code here...
     return 0;
 }

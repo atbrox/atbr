@@ -5,6 +5,8 @@ from patricia_tree import patricia
 from operator import itemgetter
 import time
 import sys
+import base64
+import zlib
 import math
 
 ZEROVAL = u""
@@ -35,6 +37,59 @@ def big_test(argv,file_encoding="latin-1"):
             #p2.addVal(word, word)
             added[word] = True
   
+    return p2._data, allwords
+
+def process_value(value):
+    import array
+    print >> sys.stderr, type(value)
+    v = array.array('I')
+    values = [int(x) for x in value.split(",")]
+    result = [values[0]]
+    v.append(int(result[0]))
+    for i in range(1,len(values)):
+        result.append(values[i]-values[i-1])
+        v.append(int(result[i]))
+
+    r = str(result)
+    r2 = ",".join([str(x).strip() for x in result])
+    print >> sys.stderr, r2
+    print >> sys.stderr, len(r), len(zlib.compress(r, 9)), len(zlib.compress(v.tostring())), len(v.tostring()), len(r2), len(zlib.compress(r2))
+    return r2
+
+def read_tsv(argv,file_encoding="latin-1"):
+    filename = "../testdata/norwegian_words.txt"
+    if len(argv) > 1:
+        filename = argv[1]
+    import codecs
+    p2 = patricia()
+    allwords = []
+
+    key_value = {}
+
+    for line in codecs.open(filename, encoding=file_encoding):
+        #print sys.stderr, "line = ", [line]
+        word, value = line.strip().split("\t")#.lower()
+        word = word.strip()
+        value = value.strip()
+
+        #value = process_value(value)
+
+        #print >> sys.stderr, process_value(value)
+
+        allwords.append(word)
+        if not p2.isWord(word):
+            p2.addWord(word)
+            key_value[word] = value
+
+    added = {}
+
+    for word in allwords:
+        if not added.has_key(word) and len(word) > 0:
+            #p2.addVal(word, word[::-1])
+            p2.addVal(word, key_value[word])
+            #p2.addVal(word, word)
+            added[word] = True
+
     return p2._data, allwords
 
 def partition(input, level=0,parent=zeroblock, mapping={}, aggregate={}, parent_val=u""):
@@ -100,7 +155,7 @@ def sort_words(words):
 # THE CODE BELOW SERIOUSLY NEEDS REFACTORING AND CLEANUP
 if __name__ == "__main__":
     t0 = time.time()
-    data, allwords = big_test(sys.argv)
+    data, allwords = read_tsv(sys.argv)
     delta0 = time.time()-t0
     print >> sys.stderr, "DELTA = ", delta0
 
