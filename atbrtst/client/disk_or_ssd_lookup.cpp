@@ -143,7 +143,7 @@ RankPriorityQueue* rank_results(vector<char*>& results) {
 
 
 
-int query_and_merge(char* query, mmapper & index) {
+RankPriorityQueue* query_and_merge(char* query, mmapper & index) {
     //cerr << "query and merge.." << endl;
     vector<string>* query_terms = tokenize_query(query);
     vector<char*> results;
@@ -163,12 +163,10 @@ int query_and_merge(char* query, mmapper & index) {
     //}
     
     
-    
-    
-    delete ranked_results;
+
     delete query_terms;
     
-    return 0;
+    return ranked_results;
         
 }
 
@@ -202,6 +200,8 @@ int main(int argc, const char * argv[])
     cerr << "query = " << query << endl;
     char* result = "";
     string res;
+    
+    RankPriorityQueue* ranked_results;
 
 #ifdef __APPLE__
     start_t = mach_absolute_time();
@@ -214,7 +214,7 @@ int main(int argc, const char * argv[])
     //result = mymmapper.newsearch(query.c_str(), 0);
     //cerr << "r2 = " << res << endl;
     
-    query_and_merge("foo atbr nasse amund", mymmapper);
+    ranked_results = query_and_merge("foo atbr nasse amund", mymmapper);
 
     
 #ifdef __APPLE__    
@@ -237,6 +237,14 @@ int main(int argc, const char * argv[])
     cerr << "res = " << res << endl;
 
     std::cerr << "Query time in microseconds = " << elapsed_microsec << endl;
+    
+    cerr << "--->>>> Ranked results" << endl;
+    
+    while(!ranked_results->empty()) {
+        cerr << "uri = " << ranked_results->top().second << ", freq = " << ranked_results->top().first << endl;
+        ranked_results->pop();
+    }
+
     
     // insert code here...
     return 0;
