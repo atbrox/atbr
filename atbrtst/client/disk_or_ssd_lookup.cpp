@@ -33,15 +33,15 @@ using std::cerr;
 using namespace std;
 
 template< typename FirstType, typename SecondType >
-struct MyPairComparator {
+struct RankPairComparator {
     bool operator()( const pair<FirstType, SecondType>& p1, const pair<FirstType, SecondType>& p2 ) const
     {  if( p1.first < p2.first ) return true;
         if( p2.first < p1.first ) return false;
-        if(p2.first == p1.first) return (p2.second < p1.second);
-        //return p1.second < p2.second;
+        if(p2.first == p1.first) return (p2.second < p1.second); // lower URI id should be higher rank if same freq.
     }
 };
 
+typedef priority_queue<pair<int, int>, vector<pair<int, int> >, RankPairComparator<int,int> > RankPriorityQueue;
 
 #ifdef __APPLE__
 uint64_t GetPIDTimeInNanoseconds(void)
@@ -117,14 +117,9 @@ vector<int>* tokenize_result(char** result, unordered_map<int, int> & uri_to_fre
     return results;
 }
 
-priority_queue<int>* rank_results(vector<char*>& results) {
+RankPriorityQueue* rank_results(vector<char*>& results) {
     
-       
-    priority_queue<pair<int, int>, vector<pair<int, int> >, MyPairComparator<int,int> > q;
-
-    
-    priority_queue<int>* ranked_results = new priority_queue<int>();
-    
+    RankPriorityQueue* ranked_results = new RankPriorityQueue();
     unordered_map<int, int> uri_to_frequency;
     
     // iterate and tokenize each result, and
@@ -137,19 +132,13 @@ priority_queue<int>* rank_results(vector<char*>& results) {
     for(std::pair<const int,int> it: uri_to_frequency) {
         cerr << "uri = " << it.first << ", " << it.second << endl;
         if(it.second > 1) {
-            ranked_results->push(it.first);
-            q.push(make_pair(it.second, it.first));
+            ranked_results->push(make_pair(it.second, it.first));
         }
     }
     
     // TODO: update priority queue, or do it incrementally in loop above.
     
-    while(!q.empty()) {
-        cerr << q.top().second << "freq = " << q.top().first << endl;
-        q.pop();
-    }
-    
-    return ranked_results;
+       return ranked_results;
 }
 
 
@@ -165,12 +154,11 @@ int query_and_merge(char* query, mmapper & index) {
         results.push_back(result);
     }
     
-    priority_queue<int>* ranked_results = rank_results(results);
-    
+    RankPriorityQueue* ranked_results = rank_results(results);
     cerr << "Ranked results" << endl;
     
     while(!ranked_results->empty()) {
-        cerr << "uri = " << ranked_results->top() << endl;
+        cerr << "uri = " << ranked_results->top().second << ", freq = " << ranked_results->top().first << endl;
         ranked_results->pop();
     }
     
