@@ -123,16 +123,26 @@ RankPriorityQueue* rank_results(vector<char*>& results) {
     unordered_map<int, int> uri_to_frequency;
     
     // iterate and tokenize each result, and
-    for(char* result: results) {
-        tokenize_result(&result, uri_to_frequency);
-        
+    vector<char*>::iterator it;
+
+    char* result;
+
+    //for(char* result: results) {
+    for(it=results.begin();it!=results.end(); ++it) {
+      result = *it;
+      tokenize_result(&result, uri_to_frequency);
         // TODO: break off
     }
     
-    for(std::pair<const int,int> it: uri_to_frequency) {
+    //for(std::pair<const int,int> it: uri_to_frequency) {
+    unordered_map<int, int>::iterator map_it;
+
+    for(map_it = uri_to_frequency.begin(); 
+	map_it != uri_to_frequency.end();
+	++map_it) {
         //cerr << "uri = " << it.first << ", " << it.second << endl;
-        if(it.second > 1) {
-            ranked_results->push(make_pair(it.second, it.first));
+      if(map_it->second > 1) {
+	  ranked_results->push(make_pair(map_it->second, map_it->first));
         }
     }
     
@@ -149,8 +159,13 @@ RankPriorityQueue* query_and_merge(char* query, mmapper & index) {
     vector<char*> results;
     
     char* result;
-    for(string query_term: *query_terms) {
-        result = index.newsearch(query_term.c_str(), 0);
+    //for(string query_term: *query_terms) {
+    vector<string>::iterator it;
+
+    for(it = query_terms->begin(); 
+	it != query_terms->end();
+	++it) {
+        result = index.newsearch(it->c_str(), 0);
         results.push_back(result);
     }
     
