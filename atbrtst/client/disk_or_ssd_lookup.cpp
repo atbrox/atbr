@@ -106,22 +106,10 @@ vector<char*>* tokenize_result(char** result, UriToFreq & uri_to_frequency) {
     UriToFreq::iterator it;
     //int uri;
     string uri;
+    size_t len;
 
     while((token = strsep(result, ",")) != NULL) {
-      //uri = atoi(token);
-      //uri = string(token);
-      size_t len;
       uri = base64_decode(token, strlen(token), &len);
-      //cerr << "token = " << token << endl;
-
-
-      string r = base64_decode(token, strlen(token), &len);
-
-      cerr << "decoded token = " << r << endl;
-
-      
-        // update map counter
-      
       it = uri_to_frequency.find(uri);
         if(it == uri_to_frequency.end()) {
             uri_to_frequency[uri] = 0;
@@ -133,7 +121,7 @@ vector<char*>* tokenize_result(char** result, UriToFreq & uri_to_frequency) {
     return results;
 }
 
-RankPriorityQueue* rank_results(vector<char*>& results) {
+RankPriorityQueue* rank_results(vector<char*>& results, int num_terms=0) {
     
     RankPriorityQueue* ranked_results = new RankPriorityQueue();
     UriToFreq uri_to_frequency;
@@ -146,9 +134,7 @@ RankPriorityQueue* rank_results(vector<char*>& results) {
     //for(char* result: results) {
     for(it=results.begin();it!=results.end(); ++it) {
       result = *it;
-      cerr << "result = " << result << endl;
       tokenize_result(&result, uri_to_frequency);
-        // TODO: break off
     }
     
     //for(std::pair<const int,int> it: uri_to_frequency) {
@@ -157,23 +143,19 @@ RankPriorityQueue* rank_results(vector<char*>& results) {
     for(map_it = uri_to_frequency.begin(); 
 	map_it != uri_to_frequency.end();
 	++map_it) {
-      //cerr << "uri = " << map_it->first << ", " << map_it->second << endl;
       if(map_it->second > 1) {
 	  ranked_results->push(make_pair(map_it->second, map_it->first));
         }
     }
     
-    // TODO: update priority queue, or do it incrementally in loop above.
-    
-       return ranked_results;
+    return ranked_results;
 }
 
 
-
 RankPriorityQueue* query_and_merge(char* query, mmapper & index) {
-  cerr << "query and merge.." << endl;
+  //cerr << "query and merge.." << endl;
     vector<string>* query_terms = tokenize_query(query);
-    cerr << "tokenized query.." << endl;
+    //cerr << "tokenized query.." << endl;
     vector<char*> results;
     
     char* result;
@@ -184,16 +166,16 @@ RankPriorityQueue* query_and_merge(char* query, mmapper & index) {
 	it != query_terms->end();
 	++it) {
         result = index.newsearch(it->c_str(), 0);
-	cerr << it->c_str() << ", res = " << result << endl;
+	//cerr << it->c_str() << ", res = " << result << endl;
 	if(strcmp(result, "<empty>") != 0 ){
-	  cerr << "pushing back" << result << endl;
+	  //cerr << "pushing back" << result << endl;
 	    results.push_back(result);
 	  }
     }
 
-    cerr << results.size() << endl;
+    //cerr << results.size() << endl;
     
-    RankPriorityQueue* ranked_results = rank_results(results);
+    RankPriorityQueue* ranked_results = rank_results(results, query_terms->size());
     //cerr << "--->>>> Ranked results" << endl;
     
     //while(!ranked_results->empty()) {
@@ -236,6 +218,7 @@ int main(int argc, const char * argv[])
     
     
     string query = argv[2];
+    char *q = strdup(argv[2]);
     cerr << "query = " << query << endl;
     char* result = "";
     string res;
@@ -255,7 +238,8 @@ int main(int argc, const char * argv[])
     
     //ranked_results = query_and_merge("foo atbr nasse amund", mymmapper);
     //ranked_results = query_and_merge("B Aughinbaugh", mymmapper);
-    ranked_results = query_and_merge("Justin 10", mymmapper);
+    //ranked_results = query_and_merge("Justin Cir,", mymmapper);
+    ranked_results = query_and_merge(q, mymmapper);
 
     
 #ifdef __APPLE__    
@@ -280,9 +264,18 @@ int main(int argc, const char * argv[])
     std::cerr << "Query time in microseconds = " << elapsed_microsec << endl;
     
     cerr << "--->>>> Ranked results" << endl;
+
+    size_t len;
+
+    string uri;
     
     while(!ranked_results->empty()) {
-        cerr << "uri = " << ranked_results->top().second << ", freq = " << ranked_results->top().first << endl;
+      uri = ranked_results->top().second;
+      //cerr << uri << endl;
+      //uri = base64_decode(uri.c_str(), uri.size(), &len);
+      
+      cerr << "uri = " << uri << ", freq = " << ranked_results->top().first << endl;
+	
         ranked_results->pop();
     }
 

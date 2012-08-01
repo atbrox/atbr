@@ -94,7 +94,7 @@ char mmapper::get_random(){
 }
 
 string mmapper::search(string query, unsigned int startpos, int address_byte_len) {
-  printf(" ==> search(query='%s', startpos='%d', abl='%d'\n", query.c_str(), startpos, address_byte_len);
+  //printf(" ==> search(query='%s', startpos='%d', abl='%d'\n", query.c_str(), startpos, address_byte_len);
     unsigned int rlength;// 64bit??
     //char buff[address_byte_len];
     memcpy(address_buffer, mmap_data + startpos, address_byte_len);
@@ -153,7 +153,7 @@ string mmapper::search(string query, unsigned int startpos, int address_byte_len
 char* mmapper::newsearch(const char* query, unsigned int startpos, int address_byte_len) {
     //const char* cquery = query.c_str(); // strdup?
 
-    printf(" ==> newsearch(query='%s', startpos='%d', abl='%d'\n", query, startpos, address_byte_len);
+  //printf(" ==> newsearch(query='%s', startpos='%d', abl='%d'\n", query, startpos, address_byte_len);
     int query_length = strlen(query); // query.size();    
     memcpy(address_buffer, mmap_data + startpos, address_byte_len);
     unsigned int rlength = atoi(address_buffer);
