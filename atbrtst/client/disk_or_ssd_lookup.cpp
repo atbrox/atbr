@@ -16,6 +16,7 @@
 #include <queue>
 #include <tr1/unordered_map>
 
+#include "base64.h"
 #include "mmapper.h"
 
 #ifdef __APPLE__
@@ -37,11 +38,13 @@ struct RankPairComparator {
     bool operator()( const pair<FirstType, SecondType>& p1, const pair<FirstType, SecondType>& p2 ) const
     {  if( p1.first < p2.first ) return true;
         if( p2.first < p1.first ) return false;
-        if(p2.first == p1.first) return (p2.second < p1.second); // lower URI id should be higher rank if same freq.
+        //if(p2.first == p1.first) return (p2.second < p1.second); // lower URI id should be higher rank if same freq.
+	// TODO: strcmp here..
     }
 };
 
-typedef priority_queue<pair<int, int>, vector<pair<int, int> >, RankPairComparator<int,int> > RankPriorityQueue;
+typedef priority_queue<pair<int, string>, vector<pair<int, string> >, RankPairComparator<int,string> > RankPriorityQueue;
+typedef unordered_map<string, int> UriToFreq;
 
 #ifdef __APPLE__
 uint64_t GetPIDTimeInNanoseconds(void)
@@ -97,16 +100,29 @@ vector<string>* tokenize_query(char* query) {
     return query_terms;
 }
 
-vector<int>* tokenize_result(char** result, unordered_map<int, int> & uri_to_frequency) {
-    vector<int>* results = new vector<int>();
+vector<char*>* tokenize_result(char** result, UriToFreq & uri_to_frequency) {
+  vector<char*>* results = new vector<char*>();
     char* token, *resultcopy, *tofree;
-    unordered_map<int, int>::iterator it;
-    int uri;
+    UriToFreq::iterator it;
+    //int uri;
+    string uri;
 
     while((token = strsep(result, ",")) != NULL) {
-        uri = atoi(token);
+      //uri = atoi(token);
+      //uri = string(token);
+      size_t len;
+      uri = base64_decode(token, strlen(token), &len);
+      //cerr << "token = " << token << endl;
+
+
+      string r = base64_decode(token, strlen(token), &len);
+
+      cerr << "decoded token = " << r << endl;
+
+      
         // update map counter
-        it = uri_to_frequency.find(uri);
+      
+      it = uri_to_frequency.find(uri);
         if(it == uri_to_frequency.end()) {
             uri_to_frequency[uri] = 0;
         } // TODO: break off when enough unique terms with > N results.
@@ -120,7 +136,7 @@ vector<int>* tokenize_result(char** result, unordered_map<int, int> & uri_to_fre
 RankPriorityQueue* rank_results(vector<char*>& results) {
     
     RankPriorityQueue* ranked_results = new RankPriorityQueue();
-    unordered_map<int, int> uri_to_frequency;
+    UriToFreq uri_to_frequency;
     
     // iterate and tokenize each result, and
     vector<char*>::iterator it;
@@ -130,17 +146,18 @@ RankPriorityQueue* rank_results(vector<char*>& results) {
     //for(char* result: results) {
     for(it=results.begin();it!=results.end(); ++it) {
       result = *it;
+      cerr << "result = " << result << endl;
       tokenize_result(&result, uri_to_frequency);
         // TODO: break off
     }
     
     //for(std::pair<const int,int> it: uri_to_frequency) {
-    unordered_map<int, int>::iterator map_it;
+    UriToFreq::iterator map_it;
 
     for(map_it = uri_to_frequency.begin(); 
 	map_it != uri_to_frequency.end();
 	++map_it) {
-        //cerr << "uri = " << it.first << ", " << it.second << endl;
+      //cerr << "uri = " << map_it->first << ", " << map_it->second << endl;
       if(map_it->second > 1) {
 	  ranked_results->push(make_pair(map_it->second, map_it->first));
         }
@@ -154,8 +171,9 @@ RankPriorityQueue* rank_results(vector<char*>& results) {
 
 
 RankPriorityQueue* query_and_merge(char* query, mmapper & index) {
-    //cerr << "query and merge.." << endl;
+  cerr << "query and merge.." << endl;
     vector<string>* query_terms = tokenize_query(query);
+    cerr << "tokenized query.." << endl;
     vector<char*> results;
     
     char* result;
@@ -166,8 +184,14 @@ RankPriorityQueue* query_and_merge(char* query, mmapper & index) {
 	it != query_terms->end();
 	++it) {
         result = index.newsearch(it->c_str(), 0);
-        results.push_back(result);
+	cerr << it->c_str() << ", res = " << result << endl;
+	if(strcmp(result, "<empty>") != 0 ){
+	  cerr << "pushing back" << result << endl;
+	    results.push_back(result);
+	  }
     }
+
+    cerr << results.size() << endl;
     
     RankPriorityQueue* ranked_results = rank_results(results);
     //cerr << "--->>>> Ranked results" << endl;
@@ -229,7 +253,9 @@ int main(int argc, const char * argv[])
     //result = mymmapper.newsearch(query.c_str(), 0);
     //cerr << "r2 = " << res << endl;
     
-    ranked_results = query_and_merge("foo atbr nasse amund", mymmapper);
+    //ranked_results = query_and_merge("foo atbr nasse amund", mymmapper);
+    //ranked_results = query_and_merge("B Aughinbaugh", mymmapper);
+    ranked_results = query_and_merge("Justin 10", mymmapper);
 
     
 #ifdef __APPLE__    

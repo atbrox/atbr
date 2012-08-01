@@ -18,6 +18,15 @@ static char encoding_table[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
 static char *decoding_table = NULL;
 static int mod_table[] = {0, 2, 1};
 
+void build_decoding_table() {
+
+  decoding_table = (char*) malloc(256);
+
+    for (int i = 0; i < 0x40; i++)
+        decoding_table[encoding_table[i]] = i;
+}
+
+
 
 char *base64_encode(const char *data,
                     size_t input_length,
@@ -25,7 +34,7 @@ char *base64_encode(const char *data,
 
     *output_length = (size_t) (4.0 * ceil((double) input_length / 3.0));
 
-    char *encoded_data = malloc(*output_length);
+    char *encoded_data = (char*) malloc(*output_length);
     if (encoded_data == NULL) return NULL;
 
     for (int i = 0, j = 0; i < input_length;) {
@@ -61,7 +70,7 @@ char *base64_decode(const char *data,
     if (data[input_length - 1] == '=') (*output_length)--;
     if (data[input_length - 2] == '=') (*output_length)--;
 
-    char *decoded_data = malloc(*output_length);
+    char *decoded_data = (char*) malloc(*output_length);
     if (decoded_data == NULL) return NULL;
 
     for (int i = 0, j = 0; i < input_length;) {
@@ -84,14 +93,6 @@ char *base64_decode(const char *data,
     return decoded_data;
 }
 
-
-void build_decoding_table() {
-
-    decoding_table = malloc(256);
-
-    for (int i = 0; i < 0x40; i++)
-        decoding_table[encoding_table[i]] = i;
-}
 
 
 void base64_cleanup() {
