@@ -153,9 +153,9 @@ RankPriorityQueue* rank_results(vector<char*>& results, int num_terms=0) {
 
 
 RankPriorityQueue* query_and_merge(char* query, mmapper & index) {
-  //cerr << "query and merge.." << endl;
+  cerr << "query and merge.." << query << endl;
     vector<string>* query_terms = tokenize_query(query);
-    //cerr << "tokenized query.." << endl;
+    cerr << "tokenized query.." << endl;
     vector<char*> results;
     
     char* result;
@@ -165,10 +165,11 @@ RankPriorityQueue* query_and_merge(char* query, mmapper & index) {
     for(it = query_terms->begin(); 
 	it != query_terms->end();
 	++it) {
+      cerr << "before result" << endl;
         result = index.newsearch(it->c_str(), 0);
-	//cerr << it->c_str() << ", res = " << result << endl;
+	cerr << it->c_str() << ", res = " << result << endl;
 	if(strcmp(result, "<empty>") != 0 ){
-	  //cerr << "pushing back" << result << endl;
+	  cerr << "pushing back" << result << endl;
 	    results.push_back(result);
 	  }
     }
