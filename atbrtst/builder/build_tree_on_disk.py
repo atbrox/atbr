@@ -72,7 +72,9 @@ def read_tsv(argv,file_encoding="latin-1"):
         word = json.loads(word.strip())
         value = json.loads(value.strip())
 
-        nvalue = ",".join(value).strip()
+        #value = value.replace('"', "")
+
+        nvalue = ",".join(value).strip().replace('"', "")
 
         #value = process_value(value)
 

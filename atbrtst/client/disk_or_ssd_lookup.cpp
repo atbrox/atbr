@@ -16,7 +16,7 @@
 #include <queue>
 #include <tr1/unordered_map>
 
-#include "base64.h"
+//#include "base64.h" // note: remember to free up tables correctly
 #include "mmapper.h"
 
 #ifdef __APPLE__
@@ -96,12 +96,13 @@ vector<string>* tokenize_query(char* query) {
         query_terms->push_back(string(token));
     }
     
-    delete [] tofree;
+    //delete [] tofree;
+    //free(tofree);
     return query_terms;
 }
 
-vector<char*>* tokenize_result(char** result, UriToFreq & uri_to_frequency) {
-  vector<char*>* results = new vector<char*>();
+void tokenize_result(char** result, UriToFreq & uri_to_frequency) {
+  cerr << "tokeniz resul.." << endl;
     char* token, *resultcopy, *tofree;
     UriToFreq::iterator it;
     //int uri;
@@ -109,7 +110,7 @@ vector<char*>* tokenize_result(char** result, UriToFreq & uri_to_frequency) {
     size_t len;
 
     while((token = strsep(result, ",")) != NULL) {
-      uri = base64_decode(token, strlen(token), &len);
+      uri = token; ///base64_decode(token, strlen(token), &len);
       it = uri_to_frequency.find(uri);
         if(it == uri_to_frequency.end()) {
             uri_to_frequency[uri] = 0;
@@ -117,8 +118,8 @@ vector<char*>* tokenize_result(char** result, UriToFreq & uri_to_frequency) {
         ++uri_to_frequency[uri];
     }
     
-    delete [] tofree;
-    return results;
+  cerr << "after tokeniz resul.." << endl;
+    //return results;
 }
 
 RankPriorityQueue* rank_results(vector<char*>& results, int num_terms=0) {
@@ -131,11 +132,15 @@ RankPriorityQueue* rank_results(vector<char*>& results, int num_terms=0) {
 
     char* result;
 
+    cerr << "before tokenizing" << endl;
+
     //for(char* result: results) {
     for(it=results.begin();it!=results.end(); ++it) {
       result = *it;
       tokenize_result(&result, uri_to_frequency);
     }
+
+    cerr << "afer tokeniz.." << endl;
     
     //for(std::pair<const int,int> it: uri_to_frequency) {
     UriToFreq::iterator map_it;
@@ -174,9 +179,11 @@ RankPriorityQueue* query_and_merge(char* query, mmapper & index) {
 	  }
     }
 
-    //cerr << results.size() << endl;
-    
+
+    cerr << "before rnking.." << endl;
     RankPriorityQueue* ranked_results = rank_results(results, query_terms->size());
+
+    cerr << "finished rnking.." << endl;
     //cerr << "--->>>> Ranked results" << endl;
     
     //while(!ranked_results->empty()) {
@@ -271,14 +278,25 @@ int main(int argc, const char * argv[])
     string uri;
     
     while(!ranked_results->empty()) {
+      //cerr << "before uri" << endl;
       uri = ranked_results->top().second;
+      //cerr << "afer uri" << endl;
+      
       //cerr << uri << endl;
       //uri = base64_decode(uri.c_str(), uri.size(), &len);
       
       cerr << "uri = " << uri << ", freq = " << ranked_results->top().first << endl;
-	
+
+      //cerr << "before pop" << endl;
         ranked_results->pop();
+	//cerr << "afer pop" << endl;
     }
+
+    cerr << "loop.." << endl;
+
+    delete ranked_results;
+
+    cerr << "need to release memory?" << endl;
 
     
     // insert code here...

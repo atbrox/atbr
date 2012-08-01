@@ -6,7 +6,7 @@ CC=g++ -std=gnu++0x
 EXTRAARGS=-std=gnu++0x
 #MACARGS=
 
-all: atbr_lookup
+all: atbr_lookup Makefile
 
 atbr_lookup: disk_or_ssd_lookup.o mmapper.o
 	$(CC) -O3 -v -ftime-report -I./include -o atbr_lookup disk_or_ssd_lookup.o mmapper.o $(EXTRAARGS)

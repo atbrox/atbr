@@ -61,7 +61,7 @@ mmapper::mmapper(string filename, int cachesize, int address_byte_len) {
     fclose(mmap_fp);
     cerr << "filename = " << filename << ", size = " << mmap_size << endl;
     srand ( time(NULL) );
-    json_document = new rapidjson::Document();
+    //json_document = new rapidjson::Document();
     if(cachesize > 0) {
         // read data from filename
         // and input into hashmap
@@ -75,7 +75,7 @@ mmapper::mmapper(string filename, int cachesize, int address_byte_len) {
 mmapper::~mmapper() {
     delete [] line_buffer;
     delete [] address_buffer;
-    delete json_document;
+    //delete json_document;
     munmap(mmap_data, mmap_size);
 }
 
