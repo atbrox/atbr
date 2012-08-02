@@ -30,11 +30,13 @@ extern "C" {
 #endif // __APPLE__
 
 
-
 using std::endl;
 using std::cerr;
 using namespace rapidjson;
 using namespace std; // for string
+
+
+const int MAX_LINE_LENGTH=30000000;
 
 
 /*
@@ -46,7 +48,7 @@ using namespace std; // for string
  */
 
 mmapper::mmapper(string filename, int cachesize, int address_byte_len) {
-    line_buffer = new char[10000000];
+    line_buffer = new char[MAX_LINE_LENGTH];
     address_buffer = new char[address_byte_len];
     mmap_fp = fopen(filename.c_str(), "rb");
     assert(mmap_fp != NULL);
@@ -99,6 +101,8 @@ string mmapper::search(string query, unsigned int startpos, int address_byte_len
     //char buff[address_byte_len];
     memcpy(address_buffer, mmap_data + startpos, address_byte_len);
     rlength = atoi(address_buffer);
+    assert(rlength < MAX_LINE_LENGTH); 
+    //cerr << "rlength, query = " << rlength << ", " << query << endl;
     memcpy(line_buffer, mmap_data+startpos, rlength);
     line_buffer[rlength] = '\0';
     
@@ -157,6 +161,8 @@ char* mmapper::newsearch(const char* query, unsigned int startpos, int address_b
     int query_length = strlen(query); // query.size();    
     memcpy(address_buffer, mmap_data + startpos, address_byte_len);
     unsigned int rlength = atoi(address_buffer);
+    assert(rlength < MAX_LINE_LENGTH); 
+    //cerr << "rlength, query = " << rlength << ", " << query << endl;
     memcpy(line_buffer, mmap_data+startpos, rlength);
     line_buffer[rlength] = '\0';
     char* crecord = line_buffer;
