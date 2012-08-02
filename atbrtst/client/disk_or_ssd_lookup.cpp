@@ -104,22 +104,42 @@ void tokenize_result(string & result, UriToFreq & uri_to_frequency) {
   size_t result_len = result.size();
   size_t last_comma_pos = -1;
   size_t current_comma_pos = result.find_first_of(',', last_comma_pos+1);
-  UriToFreq::iterator it;
 
-  while(current_comma_pos < result_len) {
-    string uri = result.substr(last_comma_pos+1, (current_comma_pos-last_comma_pos-2));
+  if(current_comma_pos == string::npos) {
+    cerr << "AT THE END" << endl;
+    return;
+  }
+
+  UriToFreq::iterator it;
+  string uri;
+
+  while(current_comma_pos < result_len-1) {
+    uri = result.substr(last_comma_pos+1, (current_comma_pos-last_comma_pos-2));
+
     //cerr << "uri = " << uri << endl;
     last_comma_pos = current_comma_pos;
-    current_comma_pos = result.find_first_of(',', last_comma_pos+1);
 
-    it = uri_to_frequency.find(uri);
-    if(it == uri_to_frequency.end()) {
-      uri_to_frequency[uri] = 0;
-      
-    } // TODO: break off when enough unique terms with > N results.
-    uri_to_frequency[uri] = uri_to_frequency[uri]+1; // or insert?
-    //cerr << "uri = " << uri << ", freq = " << uri_to_frequency[uri] << endl;
+    if((current_comma_pos >= 0) && (current_comma_pos < result_len)) {
+      it = uri_to_frequency.find(uri);
+      if(it == uri_to_frequency.end()) {
+	uri_to_frequency[uri] = 0;
+	
+      } // TODO: break off when enough unique terms with > N results.
+      uri_to_frequency[uri] = uri_to_frequency[uri]+1; // or insert?
+      cerr << "uri = " << uri << ", freq = " << uri_to_frequency[uri] << ">>" << current_comma_pos << ", " << last_comma_pos << ", " << result_len << endl;
+    } else {
+      cerr << "finished!!" << endl;
+      break;
+    }
+
+    current_comma_pos = result.find_first_of(',', last_comma_pos+1);
+    if(current_comma_pos == string::npos) {
+      cerr << "ENDING.." << endl;
+      break;
+    }
   }
+  cerr << "last comma_pos, current = " << last_comma_pos << ", " << current_comma_pos << endl;
+
 }
 
 
@@ -135,8 +155,12 @@ RankPriorityQueue* query_and_merge(char* query, mmapper & index) {
         it != query_terms->end();
         ++it) {
         //cerr << "before result" << endl;
+	cerr << "######^^^^^^^^ query = " << it->c_str() << endl;
         res = index.newsearch(it->c_str(), 0);
+	cerr << "res = " << res  << endl;
         tokenize_result(res, uri_to_frequency);
+	cerr << "^^^^^^^^ query = " << it->c_str() << endl;
+	cerr << "######################################" << endl;
     }
 
     RankPriorityQueue* ranked_results = new RankPriorityQueue();

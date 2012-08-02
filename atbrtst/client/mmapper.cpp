@@ -46,7 +46,7 @@ using namespace std; // for string
  */
 
 mmapper::mmapper(string filename, int cachesize, int address_byte_len) {
-    line_buffer = new char[100000];
+    line_buffer = new char[10000000];
     address_buffer = new char[address_byte_len];
     mmap_fp = fopen(filename.c_str(), "rb");
     assert(mmap_fp != NULL);
