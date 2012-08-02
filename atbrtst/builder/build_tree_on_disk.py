@@ -71,15 +71,7 @@ def read_tsv(argv,file_encoding="latin-1"):
         word, value = line.strip().split("\t")#.lower()
         word = json.loads(word.strip())
         value = json.loads(value.strip())
-
-        #value = value.replace('"', "")
-
-        nvalue = ",".join(value).strip().replace('"', "")
-
-        #value = process_value(value)
-
-        #print >> sys.stderr, process_value(value)
-
+        nvalue = ",".join(value)
         allwords.append(word)
         if not p2.isWord(word):
             p2.addWord(word)
