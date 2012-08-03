@@ -88,6 +88,37 @@ def read_tsv(argv,file_encoding="latin-1"):
 
     return p2._data, allwords
 
+def read_input(argv,file_encoding="latin-1"):
+    filename = "../testdata/norwegian_words.txt"
+    if len(argv) > 1:
+        filename = argv[1]
+    import codecs
+    p2 = patricia()
+    allwords = []
+
+    key_value = {}
+
+    for line in codecs.open(filename, encoding=file_encoding):
+        #print sys.stderr, "line = ", [line]
+        #word, value = line.strip().split("\t")#.lower()wor
+        word = json.loads(line.strip())
+        #word = json.loads(word.strip())
+        #value = json.loads(value.strip())
+        #nvalue = ",".join(value)
+        if not p2.isWord(word):
+            allwords.append(word) # or above?
+            p2.addWord(word)
+
+    added = {}
+
+    for word in allwords:
+        if not added.has_key(word) and len(word) > 0:
+            p2.addVal(word, word)
+            added[word] = True
+
+    return p2._data, allwords
+
+
 def partition(input, level=0,parent=zeroblock, mapping={}, aggregate={}, parent_val=u""):
     """recursive method that unwraps a patricia tree datastructure in
     a way suitable to represent in for low latency disk lookup
@@ -151,7 +182,7 @@ def sort_words(words):
 # THE CODE BELOW SERIOUSLY NEEDS REFACTORING AND CLEANUP
 if __name__ == "__main__":
     t0 = time.time()
-    data, allwords = read_tsv(sys.argv)
+    data, allwords = read_input(sys.argv)
     delta0 = time.time()-t0
     print >> sys.stderr, "DELTA = ", delta0
 
