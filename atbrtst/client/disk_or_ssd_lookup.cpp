@@ -97,7 +97,24 @@ vector<string>* tokenize_query(char* query) {
     return query_terms;
 }
 
+void char_tokenize_result(char** result, UriToFreq & uri_to_frequency) {
+  char* token, *resultcopy, *tofree;
+  UriToFreq::iterator it;
+  //int uri;
+  string uri;
+  size_t len;
 
+  while((token = strsep(result, ",")) != NULL) {
+    uri = token; //base64_decode(token, strlen(token), &len);
+    it = uri_to_frequency.find(uri);
+    if(it == uri_to_frequency.end()) {
+      uri_to_frequency[uri] = 0;
+    } // TODO: break off when enough unique terms with > N results.
+    ++uri_to_frequency[uri];
+  }
+    
+  delete [] tofree;
+}
 
 void tokenize_result(string & result, UriToFreq & uri_to_frequency) {
   size_t start_pos = 0;
@@ -106,7 +123,7 @@ void tokenize_result(string & result, UriToFreq & uri_to_frequency) {
   size_t current_comma_pos = result.find_first_of(',', last_comma_pos+1);
 
   if(current_comma_pos == string::npos) {
-    cerr << "AT THE END" << endl;
+    //cerr << "AT THE END" << endl;
     return;
   }
 
@@ -125,21 +142,28 @@ void tokenize_result(string & result, UriToFreq & uri_to_frequency) {
 	uri_to_frequency[uri] = 0;
 	
       } // TODO: break off when enough unique terms with > N results.
-      uri_to_frequency[uri] = uri_to_frequency[uri]+1; // or insert?
-      cerr << "uri = " << uri << ", freq = " << uri_to_frequency[uri] << ">>" << current_comma_pos << ", " << last_comma_pos << ", " << result_len << endl;
+      uri_to_frequency[uri] = uri_to_frequency[uri]+1;
     } else {
-      cerr << "finished!!" << endl;
       break;
     }
 
     current_comma_pos = result.find_first_of(',', last_comma_pos+1);
     if(current_comma_pos == string::npos) {
-      cerr << "ENDING.." << endl;
       break;
     }
   }
-  cerr << "last comma_pos, current = " << last_comma_pos << ", " << current_comma_pos << endl;
 
+  // need to copy last result
+  if(result_len-last_comma_pos > 1) {
+    uri = result.substr(last_comma_pos+1, result_len-last_comma_pos-1);
+    it = uri_to_frequency.find(uri);
+    if(it == uri_to_frequency.end()) {
+      uri_to_frequency[uri] = 0;
+	
+    } // TODO: break off when enough unique terms with > N results.
+    //++uri_to_frequency[uri];
+    uri_to_frequency[uri] = uri_to_frequency[uri]+1;
+  }
 }
 
 
@@ -150,20 +174,31 @@ RankPriorityQueue* query_and_merge(char* query, mmapper & index) {
     UriToFreq uri_to_frequency;
     
     string res;
+    char *result;
     
     for(it = query_terms->begin();
         it != query_terms->end();
         ++it) {
         //cerr << "before result" << endl;
-	cerr << "######^^^^^^^^ query = " << it->c_str() << endl;
-        res = index.newsearch(it->c_str(), 0);
-	cerr << "res = " << res  << endl;
-        tokenize_result(res, uri_to_frequency);
-	cerr << "^^^^^^^^ query = " << it->c_str() << endl;
-	cerr << "######################################" << endl;
+      //cerr << "######^^^^^^^^ query = " << it->c_str() << endl;
+
+      //if(strcmp(it->c_str(), "Ave") != 0) {
+      //cerr << "Q = " << *it << endl;
+	result = index.newsearch(it->c_str(), 0);
+	//cerr << "res = " << res << endl;
+      //res = index.newsearch(it->c_str(), 0);
+	//cerr << "res = " << res  << endl;
+        //tokenize_result(res, uri_to_frequency);
+
+      char_tokenize_result(&result, uri_to_frequency);
+      //}
+	//cerr << "^^^^^^^^ query = " << it->c_str() << endl;
+	//cerr << "######################################" << endl;
     }
 
     RankPriorityQueue* ranked_results = new RankPriorityQueue();
+
+
     UriToFreq::iterator map_it;
     
     for(map_it = uri_to_frequency.begin();
@@ -181,7 +216,7 @@ RankPriorityQueue* query_and_merge(char* query, mmapper & index) {
 int main(int argc, const char * argv[])
 {
     if(argc != 3) {
-        cerr << "usage: " << argv[0] << " <filename> <query>" << endl;
+      cerr << "usage: " << argv[0] << " <filename> <query>" << endl;
         exit(1);
     }
     

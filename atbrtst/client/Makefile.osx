@@ -4,13 +4,13 @@ EXTRAARGS=-framework CoreServices -Wc++11-extensions
 all: atbr_lookup Makefile.osx
 
 atbr_lookup: disk_or_ssd_lookup.o mmapper.o
-	$(CC) -g -v -ftime-report -I./include -o atbr_lookup disk_or_ssd_lookup.o mmapper.o $(EXTRAARGS)
+	$(CC) -O3 -v -ftime-report -I./include -o atbr_lookup disk_or_ssd_lookup.o mmapper.o $(EXTRAARGS)
 
 disk_or_ssd_lookup.o: disk_or_ssd_lookup.cpp *.h
-	$(CC) -g -v -ftime-report -I./include -c disk_or_ssd_lookup.cpp
+	$(CC) -O3 -v -ftime-report -I./include -c disk_or_ssd_lookup.cpp
 
 mmapper.o: mmapper.cpp mmapper.h
-	$(CC) -g -v -ftime-report -I./include -c mmapper.cpp
+	$(CC) -O3 -v -ftime-report -I./include -c mmapper.cpp
 
 stringperformancetest: stringperformancetest.cpp
 	$(CC) stringperformancetest.cpp -o stringperformancetest
