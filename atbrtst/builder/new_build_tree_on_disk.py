@@ -8,6 +8,7 @@ import sys
 import base64
 import zlib
 import math
+from atbr import atbr
 
 ZEROVAL = u""
 
@@ -118,7 +119,7 @@ def read_input(argv,file_encoding="latin-1"):
     j = 0
     for word in allwords:
         if not added.has_key(word) and len(word) > 0:
-            p2.addVal(word, word)
+            p2.addVal(word, word[::-1])
             added[word] = True
             if j % 10000 == 0:
                 print >> sys.stderr, "added key number ", j
@@ -194,32 +195,27 @@ def sort_words(words):
     return only_sorted_words
 
 # THE CODE BELOW SERIOUSLY NEEDS REFACTORING AND CLEANUP
-if __name__ == "__main__":
-    t0 = time.time()
-    data, allwords = read_input(sys.argv)
-    delta0 = time.time()-t0
+def partition_patricia_tree(data, t0):
+    delta0 = time.time() - t0
     print >> sys.stderr, "DELTA = ", delta0
-
     mapping = {}
     aggregate = {}
     t1 = time.time()
     partition(data, mapping=mapping, aggregate=aggregate)
-    delta1 = time.time()-t1
+    delta1 = time.time() - t1
+    return aggregate, delta0, delta1, mapping
 
-    # create special zeroblock entry
-    slimmed = {}
-    aggregate[zeroblock] = {'id':zeroblock, "c":mapping[zeroblock],
-                            "full_val": ZEROVAL}
 
+def first_pass_ordering(aggregate, mapping, slimmed, keyvalues):
     pos = 0
     mapped_pos = {}
     all_words = []
     ordering_info = {}
     t2 = time.time()
     format = "%%0%dd" % (9)
-
+    fatval = [str(x) for x in range(100)]
     for key in sorted(aggregate):
-        slim = ["",""]
+        slim = ["", ""]
         if mapping.has_key(key):
             aggregate[key]["c"] = mapping[key]
             slim[1] = mapping[key]
@@ -229,85 +225,180 @@ if __name__ == "__main__":
         ordering_info[key] = (slim, aggregate[key]["full_val"])
         all_words.append(aggregate[key]["full_val"])
         mapped_pos[key] = format % (pos)
+        print >> sys.stderr, "mapped_pos[key] = ", key, mapped_pos[key]
         data = "%s\n" % (json.dumps(slim))
+
+        #print >> sys.stderr, "DATA = ", data
         # TODO: need to create placeholder data_len here, for actual record
         # and then later retrieve data when it is to be written to disk
         # seems to need a few assert wrt. balance of byte alignments..
+
+        # MAKING ROOM FOR BIGGER VALUE, BUT NOT ACTUALLY STORING IT
+        # NOTE: COULD DO PADDING HERE?
+        #print >> sys.stderr, "##KEY = ", key
+
         data_len = len(data)
-        record_len = "%09d" % (data_len+9) # itself!
+
+        if slim[0] != "": # LOOKUP!
+            print >> sys.stderr, "NADA..", slim
+            k = json.dumps(slim[0][::-1])
+            yoda = keyvalues.get(k) # MAY NEED TO RECALCULATE HERE..
+            d2 = """["", "%s"]\n""" % (slim[1])
+
+            print >> sys.stderr, "d2 = ", d2
+            #print >> sys.stderr, "YDPA = ", yoda, k, d2, len(d2), data_len, data
+            #print >> sys.stderr, [d2, data]
+            data_len = len(d2) + len(yoda)
+
+        #data_len = len(fatval)
+        record_len = "%09d" % (data_len + 9) # itself!
         pos += len(record_len) + data_len
         slimmed[key] = (record_len, slim)
+    return all_words, mapped_pos, ordering_info, t2
 
-    delta2 = time.time()-t2
 
+def second_pass_ordering(all_words, mapped_pos, ordering_info, slimmed, t2, keyvalues):
+    delta2 = time.time() - t2
     t3 = time.time()
     sorted_words = sort_words(all_words)
-    delta3 = time.time()-t3
-
+    delta3 = time.time() - t3
     word_to_order = {}
     for i, word in enumerate(sorted_words):
         word_to_order[word] = i
-
     t4 = time.time()
-
     new_records = []
-
     slim_sorted = sorted(slimmed)
-
     address = 0
     for i, key in enumerate(slim_sorted):
         slim = slimmed[key][1]
+        print >>sys.stderr, ".. slim = ", slim
         for k in slim[1]:
             slimmed[key][1][1][k] = mapped_pos[slim[1][k]]
+
+        # NOTE: can always skip slim[0] since not using
+        # may need to recalculate
+
         slim = slimmed[key][1]
+
         jslim = json.dumps(slim) # this has been done above.., should look up in atbr instead
-        value = "%s%s\n" % (slimmed[key][0], jslim) 
+        value = "%s%s\n" % (slimmed[key][0], jslim)
         val_len = len(value) # this value should be known already (above)?? keys are fixed size
+
+        print >> sys.stderr, "jslim = ", key, jslim
+
+        if slim[0] != "": # just indirect pointer
+            #jslim = json.dumps()
+            k = json.dumps(slim[0][::-1])
+            yoda = keyvalues.get(k) # MAY NEED TO RECALCULATE HERE..
+            d3 = """["", "%s"]\n""" % (slim[1])
+            jslim2 = json.dumps(d3)
+            jslim = jslim2
+            wal = "%s%s\n" % (slimmed[key][0], jslim2)
+            new_val_len = len(wal) + len(yoda) # OR CALCULATED VALUE BASED ON IT
+            print >> sys.stderr, new_val_len
+            val_len = new_val_len
+
+        print >> sys.stderr, "BUILTSLIM = ", slim
+
         order_info = ordering_info[key]
         order = word_to_order[order_info[1]]
         # probably don't need to keep everything in new_records, can look up later
         # can skip jslim and slim and put elsewhere, some dup info as well here
         new_records.append((order, i, address, order_info[1], val_len, slimmed[key][0], jslim, slim))
         address += val_len # need to add '\n'
+    return delta2, delta3, new_records, t4
 
-    delta4 = time.time()-t4
 
+def third_pass_ordering(new_records, t4):
+    delta4 = time.time() - t4
     # REORDERING RECORDS ACCORDING TO SORTED ENTRIES
     t5 = time.time()
     ordered_new_records = sorted(new_records, key=itemgetter(0))
-    delta5 = time.time()-t5
+    delta5 = time.time() - t5
     t6 = time.time()
     address = 0
     new_map = {}
-
     for record in ordered_new_records:
         new_record = (address, record) # unused??
         # value is not needed here, but a key to lookup is?
         #value = "%s%s\n" % (record[5], record[6])
-        #assert len(value) == record[4]
+        #assert len(value) == record[4] # DEBUG ONLY!!
         old_address = record[2]
         new_map[old_address] = (address, record[3])
+
+        # TODO: need to get this somehow!!
         address += record[4]
+    delta6 = time.time() - t6
+    return delta4, delta5, delta6, new_map, ordered_new_records
 
-    delta6 = time.time()-t6
 
+def fourth_pass_ordering(delta0, delta1, delta2, delta3, delta4, delta5, delta6, new_map, ordered_new_records,keyvalues):
     t7 = time.time()
-
     # UPDATE TO NEW ADDRESS REFERENCES
+    acc_address = 0
     for record in ordered_new_records:
         slim = record[7]
+        print >> sys.stderr, "RECORD = ", record
+        print >> sys.stderr, "B.slim = ", slim
+        print >> sys.stderr, "acc_address = ", acc_address
+
         if type(slim[1]) == dict:
             for key in slim[1]:
-                new_address_info = new_map[int(slim[1][key])]
+                print >> sys.stderr, "slim[1] = ", slim[1], key
+                print >> sys.stderr, "new_map = ", new_map.keys()
+                #new_address_info = new_map[int(slim[1][key])]
+                new_address_info = new_map[acc_address]
+                print >> sys.stderr, "new_address_ifnfo = ", new_address_info   , acc_address
                 (new_address, _) = new_address_info
                 format = "%%0%dd" % (9) # HARDCODED!
                 formatted_new_address = format % (new_address)
-                slim[1][key] = formatted_new_address
-        # THIS is where to look up the value from atbr
-        value = "%s%s" % (record[5], json.dumps(slim))
+                #slim[1][key] = formatted_new_address
+                print >>sys.stderr, "slim1 after", slim[1]
+            # THIS is where to look up the value from atbr
+        if slim[0] != "":
+            # lookup and insert value
+            k = json.dumps(slim[0][::-1])
+            yoda = keyvalues.get(k) # MAY NEED TO RECALCULATE HERE..
+            data = [yoda, slim[1]]
+            print >> sys.stderr, "data = ", data
+            d3 = json.dumps(data)
+            slim = d3
+        else:
+            slim = json.dumps(slim)
+
+        value = "%s%s" % (record[5], str(slim))
+        acc_address += record[4]
         print value
-
-    delta7 = time.time()-t7
-
+    delta7 = time.time() - t7
     print >> sys.stderr, "deltas = ", [delta0, delta1, delta2, delta3, delta4, delta5, delta6, delta7]
+
+if __name__ == "__main__":
+    t0 = time.time()
+    data, allwords = read_input(sys.argv)
+
+    fake_atbr = atbr.Atbr()
+    fake_atbr.put(json.dumps("amund"),"trondheim2012")
+    fake_atbr.put(json.dumps("abra"), "sahara2011")
+
+    aggregate, delta0, delta1, mapping = partition_patricia_tree(data, t0)
+
+    print >> sys.stderr, "... mapping = ", mapping
+    print >> sys.stderr, "... aggregate = ", aggregate
+
+    # create special zeroblock entry
+    slimmed = {}
+    aggregate[zeroblock] = {'id':zeroblock, "c":mapping[zeroblock],
+                            "full_val": ZEROVAL}
+
+    all_words, mapped_pos, ordering_info, t2 = first_pass_ordering(aggregate, mapping, slimmed, fake_atbr)
+
+    print >> sys.stderr, "SLIMMED = ", slimmed
+
+    delta2, delta3, new_records, t4 = second_pass_ordering(all_words, mapped_pos, ordering_info, slimmed, t2, fake_atbr)
+
+    print >> sys.stderr, "NEW RECORDS = ", new_records
+
+    delta4, delta5, delta6, new_map, ordered_new_records = third_pass_ordering(new_records, t4)
+
+    fourth_pass_ordering(delta0, delta1, delta2, delta3, delta4, delta5, delta6, new_map, ordered_new_records, fake_atbr)
 

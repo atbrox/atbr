@@ -180,7 +180,7 @@ RankPriorityQueue* query_and_merge(char* query, mmapper & index) {
         it != query_terms->end();
         ++it) {
         //cerr << "before result" << endl;
-      //cerr << "######^^^^^^^^ query = " << it->c_str() << endl;
+      cerr << "######^^^^^^^^ query = " << it->c_str() << endl;
 
       //if(strcmp(it->c_str(), "Ave") != 0) {
       //cerr << "Q = " << *it << endl;
@@ -189,6 +189,7 @@ RankPriorityQueue* query_and_merge(char* query, mmapper & index) {
       //res = index.newsearch(it->c_str(), 0);
 	//cerr << "res = " << res  << endl;
         //tokenize_result(res, uri_to_frequency);
+	cerr << "result=" << result << endl;
 
       char_tokenize_result(&result, uri_to_frequency);
       //}
