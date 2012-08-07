@@ -12,6 +12,8 @@
 #include <iostream>
 #include <string>
 using std::string;
+using std::endl;
+using std::cerr;
 
 #ifdef SPARSE_MAP
 #include <google/sparse_hash_map>
@@ -99,6 +101,7 @@ typedef unordered_map<string, string> AtbrMapType;
 #endif
 
       FILE* fp = fopen(filename, "r");
+      unsigned int line_len;
       if(fp)
 	{
 	  setvbuf(fp,0,_IOFBF,FILE_BUFFER_SIZE);
@@ -109,7 +112,14 @@ typedef unordered_map<string, string> AtbrMapType;
 		linebuffer[strlen(linebuffer)-1] = 0;
 	      }
 
-	      totsize += strlen(linebuffer);
+	      line_len = strlen(linebuffer);
+	      if(line_len > 100000) {
+		cerr << "long line, len = " << line_len << endl;
+	      }
+
+	      assert(line_len < LINE_BUFFER_SIZE);
+
+	      totsize += line_len;
 
 	      char *key = strtok(linebuffer,"\t");
 	      char *value = strtok(NULL,"\t");
@@ -141,9 +151,9 @@ typedef unordered_map<string, string> AtbrMapType;
       return ((timeA_p->tv_sec * 1000000000) + timeA_p->tv_nsec) -
 	((timeB_p->tv_sec * 1000000000) + timeB_p->tv_nsec);
     }
-    const static unsigned int LINE_BUFFER_SIZE = 128*1024;
+    const static unsigned int LINE_BUFFER_SIZE = 30*1024*1024;
     char linebuffer[LINE_BUFFER_SIZE]; // 
-    const static unsigned int FILE_BUFFER_SIZE = 128*1024;
+    const static unsigned int FILE_BUFFER_SIZE = 30*1024*1024;
     AtbrMapType storage;
     AtbrMapType::iterator it;
   };
