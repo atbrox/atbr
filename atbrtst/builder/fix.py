@@ -14,7 +14,11 @@ print >> sys.stderr, "finished loading part-00000"
 #print "\t".join(["orig address", "new address", "orig line len", "new line len", "data"])
 
 def format_address(address):
+    if address > 99999999:
+        print >> sys.stderr, "UNSUPPORTED ADDRESS:", address, len(str(address))
+        sys.exit(1)
     format = "%%0%dd" % (9)
+    #result = "%09d" %(address)
     return format % (address)
 
 old_to_new_address = {}
