@@ -117,7 +117,7 @@ for line in file('keyvaluefile'):
         except Exception, e:
             print >> sys.stderr, e
             print >> sys.stderr, "LINE = ", [line]
-            print sys.stderr, data[0], data
+            #print sys.stderr, data[0], data
             sys.exit(1)
             #print >> sys.stderr, "a = ", a
         b = u",".join(a)
