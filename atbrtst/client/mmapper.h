@@ -21,12 +21,12 @@ using std::string;
 
 class mmapper {
 public:
-    mmapper(string filename, int cachesize=0, int address_byte_len=9);
+    mmapper(string filename, int cachesize=0, int address_byte_len=11);
     virtual ~mmapper(); 
     inline char get(uint64_t pos);
     char get_random();
-    string search(string query, unsigned int startpos, int address_byte_len=9);
-    char* newsearch(const char* query, unsigned int startpos, int address_byte_len=9);
+    string search(string query, unsigned int startpos, int address_byte_len=11);
+    char* newsearch(const char* query, unsigned int startpos, int address_byte_len=11);
 
  protected:
     FILE* get_fh() {  return mmap_fp; }
