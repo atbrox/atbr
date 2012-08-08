@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import json
+#import json
 from patricia_tree import patricia
 from operator import itemgetter
 import time
@@ -8,6 +8,7 @@ import sys
 import base64
 import zlib
 import math
+import ujson as json
 
 ZEROVAL = u""
 
