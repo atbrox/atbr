@@ -1,6 +1,7 @@
 import json
 import sys
 from atbr import atbr
+import traceback
 
 orig_start_address = 0
 new_start_address = 0
@@ -28,6 +29,8 @@ line_len = 0
 
 i = 0
 
+data = ""
+
 for line in file('kv.main'):
     orig_len = len(line)
     line = line.strip()
@@ -38,7 +41,13 @@ for line in file('kv.main'):
         print >> sys.stderr, e
         print >> sys.stderr, line.split('[')
         sys.exit(1)
-    data = json.loads(line[11:line_len])
+
+    try:
+        data = json.loads(line[11:line_len])
+    except Exception, e:
+        print >> sys.stderr, e
+        traceback.print_exc()
+        print >> sys.stder, "line, line[11:] = ", [line, line[11:line_len]]
     jdata = json.dumps(data)
 
     dlen_before = line_len
