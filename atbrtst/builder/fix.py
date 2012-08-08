@@ -83,6 +83,10 @@ i = 0
 orig_start_address = 0
 new_start_address = 0
 
+output_fh = file("output.dat", "wb")
+
+mapped_to = {}
+
 print >> sys.stderr, "2nd iteration"
 for line in file('keyvaluefile'):
     orig_line_len = len(line)  #includes newline, should check against line_len
@@ -94,15 +98,17 @@ for line in file('keyvaluefile'):
     dlen_before = line_len
     dlen_after = dlen_before # assuming no value
 
-
-
     if data[1] != "":
-        c = data[1]
+        keys = 0
         for key in data[1]:
             old_address = data[1][key]
             # TODO: fix address format
             new_address = old_to_new_address[int(old_address)]
             data[1][key] = new_address
+            mapped_to[int(old_address)]  = new_address
+            keys += 1
+        if i% 10000 == 0:
+            print >> sys.stderr, "2nd: data[1] != blank", data[1], keys
       #print >> sys.stderr, "c = ", c
     if data[0] != "":
         a = ""
@@ -130,15 +136,16 @@ for line in file('keyvaluefile'):
     i += 1
 
     # TODO: fix address format and print out
-    output = "%s%s" % (format_address(new_start_address), jdata)
+    output = "%s%s\n" % (format_address(new_start_address), jdata)
 
-    print output
+    output_fh.write(output)
+    #print output
 
     orig_start_address += dlen_before
     new_start_address += dlen_after
 
 
-
+output_fh.close()
 
 
     
