@@ -93,7 +93,8 @@ for line in file('keyvaluefile'):
     line = line.strip()
     line_len = int(line.split("[")[0])
     data = json.loads(line[9:line_len])
-    jdata = json.dumps(data)
+    #jdata = json.dumps(data)
+    jdata = ""
 
     dlen_before = line_len
     dlen_after = dlen_before # assuming no value
@@ -104,7 +105,7 @@ for line in file('keyvaluefile'):
             old_address = data[1][key]
             # TODO: fix address format
             new_address = old_to_new_address[int(old_address)]
-            data[1][key] = new_address
+            data[1][key] = format_address(new_address)
             mapped_to[int(old_address)]  = new_address
             keys += 1
         if i% 10000 == 0:
@@ -130,13 +131,21 @@ for line in file('keyvaluefile'):
         jdata = json.dumps(data)
         dlen_after = len(jdata) + 9 + 1# newline and address
 
-    if i% 10000 == 0:
-        print >> sys.stderr, "2nd iteration, i = ", i
+    # need to do this after any changes to data..
+    jdata = json.dumps(data)
+    dlen_after = len(jdata) + 9 # +1 ?
 
-    i += 1
 
     # TODO: fix address format and print out
     output = "%s%s\n" % (format_address(new_start_address), jdata)
+
+    if i% 10000 == 0:
+        print >> sys.stderr, "2nd iteration, i = ", i, len(output)-len(jdata)
+
+    i += 1
+
+
+
 
     output_fh.write(output)
     #print output
