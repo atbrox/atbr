@@ -202,7 +202,7 @@ if __name__ == "__main__":
     all_words = []
     ordering_info = {}
     t2 = time.time()
-    format = "%%0%dd" % (9)
+    format = "%%0%dd" % (11)
 
     for key in sorted(aggregate):
         slim = ["",""]
@@ -217,7 +217,7 @@ if __name__ == "__main__":
         mapped_pos[key] = format % (pos)
         data = "%s\n" % (json.dumps(slim))
         data_len = len(data)
-        record_len = "%09d" % (data_len+9) # itself!
+        record_len = "%011d" % (data_len+11) # itself!
         pos += len(record_len) + data_len
         slimmed[key] = (record_len, slim)
 
@@ -280,7 +280,7 @@ if __name__ == "__main__":
             for key in slim[1]:
                 new_address_info = new_map[int(slim[1][key])]
                 (new_address, _) = new_address_info
-                format = "%%0%dd" % (9) # HARDCODED!
+                format = "%%0%dd" % (11) # HARDCODED!
                 formatted_new_address = format % (new_address)
                 slim[1][key] = formatted_new_address
         value = "%s%s" % (record[5], json.dumps(slim))
