@@ -28,7 +28,7 @@ line_len = 0
 
 i = 0
 
-for line in file('keyvaluefile'):
+for line in file('kv.main'):
     orig_len = len(line)
     line = line.strip()
     try:
@@ -53,6 +53,7 @@ for line in file('keyvaluefile'):
             print >> sys.stderr, e
             print >> sys.stderr, "DATA = ", [data]
             print >> sys.stderr, "LINE = ", [line]
+            print >> sys.stderr, " a= ", [i, a]
             print >> sys.stderr, data[0], json.dumps(data[0])
             sys.exit(1)
         #print >> sys.stderr, "a = ", a
@@ -69,13 +70,13 @@ for line in file('keyvaluefile'):
 
     if data[1] != "":
         c = data[1]
-        print >> sys.stderr, ">>", [dlen_after, orig_len, line_len, len(jdata)]
         #print >> sys.stderr, "c = ", c
 
     old_to_new_address[orig_start_address] = new_start_address
 
     if i % 10000 == 0:
         print >> sys.stderr, "1st iteration, i = ", i
+        print >> sys.stderr, ">>", [dlen_after, orig_len, line_len, len(jdata)]
 
     i += 1
 
@@ -96,7 +97,7 @@ output_fh = file("output.dat", "wb")
 mapped_to = {}
 
 print >> sys.stderr, "2nd iteration"
-for line in file('keyvaluefile'):
+for line in file('kv.main'):
     orig_line_len = len(line)  #includes newline, should check against line_len
     line = line.strip()
     line_len = int(line.split("[")[0])
