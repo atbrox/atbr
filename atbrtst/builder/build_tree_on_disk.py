@@ -11,7 +11,7 @@ import math
 
 ZEROVAL = u""
 
-num_digits_to_represent_blocks = 9 # int(math.log10(max_num_blocks)+1)
+num_digits_to_represent_blocks = 11 # int(math.log10(max_num_blocks)+1)
 global_block = 1  # need special first block
 zeroblock = "".join([str(0) for x in range(num_digits_to_represent_blocks)])
 
