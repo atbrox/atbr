@@ -47,7 +47,7 @@ for line in file('kv.main'):
     except Exception, e:
         print >> sys.stderr, e
         traceback.print_exc()
-        print >> sys.stder, "line, line[11:] = ", [line, line[11:line_len]]
+        print >> sys.stderr, "line, line[11:] = ", [line, line[11:line_len]]
     jdata = json.dumps(data)
 
     dlen_before = line_len
@@ -75,7 +75,7 @@ for line in file('kv.main'):
         #data.append(key) # FORDEBUGGING!!
         jdata = json.dumps(data)
         dlen_after = len(jdata) + 11 + 1 # +1?
-        foo = "%s%s\n" % ()
+        #foo = "%s%s\n" % ()
 
     if data[1] != "":
         c = data[1]
