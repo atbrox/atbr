@@ -140,7 +140,7 @@ for line in file('keyvaluefile'):
     output = "%s%s\n" % (format_address(new_start_address), jdata)
 
     if i% 10000 == 0:
-        print >> sys.stderr, "2nd iteration, i = ", i, len(output)-len(jdata)
+        print >> sys.stderr, "2nd iteration, i = ", i, len(output)-len(jdata),len(format_address(new_start_address)),len("\n"), len(jdata)
 
     i += 1
 
