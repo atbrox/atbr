@@ -14,20 +14,22 @@ print >> sys.stderr, "finished loading part-00000"
 #print "\t".join(["orig address", "new address", "orig line len", "new line len", "data"])
 
 def format_address(address):
-    if address > 99999999:
-        print >> sys.stderr, "UNSUPPORTED ADDRESS:", address, len(str(address))
-        sys.exit(1)
-    format = "%%0%dd" % (9)
+    #if address > 999999999:
+    #    print >> sys.stderr, "UNSUPPORTED ADDRESS:", address, len(str(address))
+    #    sys.exit(1)
+    format = "%%0%dd" % (11)
     #result = "%09d" %(address)
     return format % (address)
 
 old_to_new_address = {}
 
 lines = []
+line_len = 0
 
 i = 0
 
 for line in file('keyvaluefile'):
+    orig_len = len(line)
     line = line.strip()
     try:
         line_len = int(line.split("[")[0])
@@ -36,7 +38,7 @@ for line in file('keyvaluefile'):
         print >> sys.stderr, e
         print >> sys.stderr, line.split('[')
         sys.exit(1)
-    data = json.loads(line[9:line_len])
+    data = json.loads(line[11:line_len])
     jdata = json.dumps(data)
 
     dlen_before = line_len
@@ -62,10 +64,12 @@ for line in file('keyvaluefile'):
         data[0] = c
         #data.append(key) # FORDEBUGGING!!
         jdata = json.dumps(data)
-        dlen_after = len(jdata) + 9
+        dlen_after = len(jdata) + 11 + 1 # +1?
+        foo = "%s%s\n" % ()
 
     if data[1] != "":
         c = data[1]
+        print >> sys.stderr, ">>", [dlen_after, orig_len, line_len, len(jdata)]
         #print >> sys.stderr, "c = ", c
 
     old_to_new_address[orig_start_address] = new_start_address
@@ -96,7 +100,7 @@ for line in file('keyvaluefile'):
     orig_line_len = len(line)  #includes newline, should check against line_len
     line = line.strip()
     line_len = int(line.split("[")[0])
-    data = json.loads(line[9:line_len])
+    data = json.loads(line[11:line_len])
     #jdata = json.dumps(data)
     jdata = ""
 
@@ -133,22 +137,22 @@ for line in file('keyvaluefile'):
         data[0] = c
         #data.append(key) # FORDEBUGGING!!
         jdata = json.dumps(data)
-        dlen_after = len(jdata) + 9 + 1# newline and address
+        dlen_after = len(jdata) + 11 + 1# newline and address
 
     # need to do this after any changes to data..
     jdata = json.dumps(data)
-    dlen_after = len(jdata) + 9 # +1 ?
+    dlen_after = len(jdata) + 11 +1 # +1 ?
 
 
     # TODO: fix address format and print out
     output = "%s%s\n" % (format_address(new_start_address), jdata)
 
+
     if i% 10000 == 0:
+        print >> sys.stderr, "### len(jdata), len(output), dlen_after, dlen_before = ", len(jdata), len(output), dlen_after, dlen_before
         print >> sys.stderr, "2nd iteration, i = ", i, len(output)-len(jdata),len(format_address(new_start_address)),len("\n"), len(jdata)
 
     i += 1
-
-
 
 
     output_fh.write(output)
