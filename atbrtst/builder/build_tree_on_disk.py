@@ -186,13 +186,17 @@ if __name__ == "__main__":
     delta0 = time.time()-t0
     print >> sys.stderr, "DELTA = ", delta0
 
+    print >> sys.stderr, "0. finished reading data:", delta0
+
     mapping = {}
     aggregate = {}
     t1 = time.time()
     partition(data, mapping=mapping, aggregate=aggregate)
     delta1 = time.time()-t1
 
-    # create special zeroblock entry
+    print >> sys.stderr, "0. finished partitioning data:", delta1
+
+# create special zeroblock entry
     slimmed = {}
     aggregate[zeroblock] = {'id':zeroblock, "c":mapping[zeroblock],
                             "full_val": ZEROVAL}
@@ -223,6 +227,8 @@ if __name__ == "__main__":
 
     delta2 = time.time()-t2
 
+    print >> sys.stderr, "2. finished", delta2
+
     t3 = time.time()
     sorted_words = sort_words(all_words)
     delta3 = time.time()-t3
@@ -232,6 +238,9 @@ if __name__ == "__main__":
         word_to_order[word] = i
 
     t4 = time.time()
+
+    print >> sys.stderr, "3. finished", delta3
+
 
     new_records = []
 
@@ -253,7 +262,10 @@ if __name__ == "__main__":
 
     delta4 = time.time()-t4
 
-    # REORDERING RECORDS ACCORDING TO SORTED ENTRIES
+    print >> sys.stderr, "4. finished", delta4
+
+
+# REORDERING RECORDS ACCORDING TO SORTED ENTRIES
     t5 = time.time()
     ordered_new_records = sorted(new_records, key=itemgetter(0))
     delta5 = time.time()-t5
@@ -270,6 +282,9 @@ if __name__ == "__main__":
         address += record[4]
 
     delta6 = time.time()-t6
+
+    print >> sys.stderr, "5. finished", delta6
+
 
     t7 = time.time()
 
