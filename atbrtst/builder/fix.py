@@ -149,7 +149,7 @@ for line in file('kv.main'):
         key = data[0]
         data[0] = c
         #data.append(key) # FORDEBUGGING!!
-        jdata = json.dumps(data)
+        #jdata = json.dumps(data)
         #dlen_after = len(jdata) + 11# newline and address
 
     # need to do this after any changes to data..

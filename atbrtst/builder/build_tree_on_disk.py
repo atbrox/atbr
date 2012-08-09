@@ -103,6 +103,10 @@ def read_input(argv,file_encoding="latin-1"):
         #print sys.stderr, "line = ", [line]
         #word, value = line.strip().split("\t")#.lower()wor
         word = json.loads(line.strip())
+
+        if '/' in word:
+            print >> sys.stderr, "Skipping word:", [word]
+            continue
         #word = json.loads(word.strip())
         #value = json.loads(value.strip())
         #nvalue = ",".join(value)
