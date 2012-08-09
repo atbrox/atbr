@@ -15,7 +15,7 @@ import os
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-python_version = "2.6"
+python_version = "2.7"
 
 os.environ['CC'] = 'g++'
 #os.environ['CC'] = 'c++'
@@ -38,7 +38,7 @@ setup(
     author_email = 'amund@atbrox.com',
     description = ("low-latency and memory-efficient key-value store"),
     long_description=read('FEATURES'),
-    version = "0.30", 
+    version = "0.31", 
     license = "Apache License 2.0",
     url = "http://atbr.atbrox.com",
     ext_modules = [ 
