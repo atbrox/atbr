@@ -48,10 +48,10 @@ for line in file('kv.main'):
         print >> sys.stderr, e
         traceback.print_exc()
         print >> sys.stderr, "line, line[11:] = ", [line, line[11:line_len]]
-    jdata = json.dumps(data)
+    jdata = ""
 
     dlen_before = line_len
-    dlen_after = dlen_before # assuming no value
+    dlen_after = 0 # assuming no value
 
     if data[0] != "":
         a = ""
@@ -73,13 +73,16 @@ for line in file('kv.main'):
         key = data[0]
         data[0] = c
         #data.append(key) # FORDEBUGGING!!
-        jdata = json.dumps(data)
-        dlen_after = len(jdata) + 11 + 1 # +1?
+
         #foo = "%s%s\n" % ()
 
     if data[1] != "":
-        c = data[1]
+        pass
+        #c = data[1]
         #print >> sys.stderr, "c = ", c
+
+    jdata = json.dumps(data)
+    dlen_after = len(jdata) + 11 # +1?
 
     old_to_new_address[orig_start_address] = new_start_address
 
@@ -115,7 +118,7 @@ for line in file('kv.main'):
     jdata = ""
 
     dlen_before = line_len
-    dlen_after = dlen_before # assuming no value
+    dlen_after = 0 # assuming no value
 
     if data[1] != "":
         keys = 0
@@ -141,17 +144,17 @@ for line in file('kv.main'):
             #print >> sys.stderr, "a = ", a
         b = u",".join(a)
         c = b.replace(u"  ", u" ")
-        dlen_before = line_len
+        #dlen_before = line_len
         #data.append(a)
         key = data[0]
         data[0] = c
         #data.append(key) # FORDEBUGGING!!
         jdata = json.dumps(data)
-        dlen_after = len(jdata) + 11 + 1# newline and address
+        #dlen_after = len(jdata) + 11# newline and address
 
     # need to do this after any changes to data..
     jdata = json.dumps(data)
-    dlen_after = len(jdata) + 11 +1 # +1 ?
+    dlen_after = len(jdata) + 11 # +1 ?
 
 
     # TODO: fix address format and print out
