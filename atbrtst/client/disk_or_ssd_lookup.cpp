@@ -43,8 +43,8 @@ struct RankPairComparator {
     }
 };
 
-typedef priority_queue<pair<int, string>, vector<pair<int, string> >, RankPairComparator<int,string> > RankPriorityQueue;
-typedef unordered_map<string, int> UriToFreq;
+typedef priority_queue<pair<int64_t, string>, vector<pair<int64_t, string> >, RankPairComparator<int64_t,string> > RankPriorityQueue;
+typedef unordered_map<string, int64_t> UriToFreq;
 
 #ifdef __APPLE__
 uint64_t GetPIDTimeInNanoseconds(void)
