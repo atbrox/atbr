@@ -91,7 +91,7 @@ for line in file('kv.main'):
         print >> sys.stderr, ">>", [dlen_after, orig_len, line_len, len(jdata)]
         print >> sys.stderr, "okDATA = ", [data,jdata, len(jdata),len(line)]
         print >> sys.stderr, "okLINE = ", [line, repr(line), repr(jdata)]
-        sys.exit(1)
+        #sys.exit(1)
 
     i += 1
 
@@ -161,8 +161,9 @@ for line in file('kv.main'):
 
 
     # TODO: fix address format and print out
-    output = "%s%s\n" % (format_address(new_start_address), jdata)
+    output = "%s%s\n" % (format_address(dlen_after), jdata)
 
+    assert dlen_after == len(output)
 
     if i% 10000 == 0:
         print >> sys.stderr, "### len(jdata), len(output), dlen_after, dlen_before = ", len(jdata), len(output), dlen_after, dlen_before
