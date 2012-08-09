@@ -189,7 +189,7 @@ RankPriorityQueue* query_and_merge(char* query, mmapper & index) {
       //res = index.newsearch(it->c_str(), 0);
 	//cerr << "res = " << res  << endl;
         //tokenize_result(res, uri_to_frequency);
-	cerr << "result=" << result << endl;
+	//cerr << "result=" << result << endl;
 
       char_tokenize_result(&result, uri_to_frequency);
       //}
@@ -205,7 +205,7 @@ RankPriorityQueue* query_and_merge(char* query, mmapper & index) {
     for(map_it = uri_to_frequency.begin();
         map_it != uri_to_frequency.end();
         ++map_it) {
-        if(map_it->second > 1) {
+      if(map_it->second >= 1) { // too loose with only one term match?
             ranked_results->push(make_pair(map_it->second, map_it->first));
         }
     }
@@ -292,6 +292,8 @@ int main(int argc, const char * argv[])
     
     string uri;
     string duri;
+
+    int res_counter = 0;
     
     while(!ranked_results->empty()) {
         //cerr << "before uri" << endl;
@@ -309,6 +311,12 @@ int main(int argc, const char * argv[])
         //cerr << "before pop" << endl;
         ranked_results->pop();
         //cerr << "afer pop" << endl;
+
+	if(res_counter > 10) {
+	  break;
+	}
+
+	++res_counter;
     }
     
     cerr << "loop.." << endl;
