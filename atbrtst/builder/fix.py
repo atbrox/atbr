@@ -1,4 +1,4 @@
-import json
+import ujson as json
 import sys
 from atbr import atbr
 import traceback
