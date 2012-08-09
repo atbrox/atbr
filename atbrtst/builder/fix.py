@@ -82,13 +82,16 @@ for line in file('kv.main'):
         #print >> sys.stderr, "c = ", c
 
     jdata = json.dumps(data)
-    dlen_after = len(jdata) + 11 # +1?
+    dlen_after = len(jdata) + 11 +1  # +1?
 
     old_to_new_address[orig_start_address] = new_start_address
 
     if i % 10000 == 0:
         print >> sys.stderr, "1st iteration, i = ", i
         print >> sys.stderr, ">>", [dlen_after, orig_len, line_len, len(jdata)]
+        print >> sys.stderr, "okDATA = ", [data,jdata, len(jdata),len(line)]
+        print >> sys.stderr, "okLINE = ", [line, repr(line), repr(jdata)]
+        sys.exit(1)
 
     i += 1
 
@@ -154,7 +157,7 @@ for line in file('kv.main'):
 
     # need to do this after any changes to data..
     jdata = json.dumps(data)
-    dlen_after = len(jdata) + 11 # +1 ?
+    dlen_after = len(jdata) + 11  +1
 
 
     # TODO: fix address format and print out
