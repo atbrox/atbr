@@ -31,7 +31,7 @@ setup(
     name = "atbr",
     author = 'Amund Tveit', 
     author_email = 'amund@atbrox.com',
-    version = "0.22", 
+    version = "0.31", 
     ext_modules = [ 
         Extension( 
             "atbr._atbr",
