@@ -256,7 +256,7 @@ int main(int argc, const char * argv[])
     
     //res = mymmapper.search(query, 0);
     //cerr << "r = " << result << endl;
-    //result = mymmapper.newsearch(query.c_str(), 0);
+    result = mymmapper.newsearch(query.c_str(), 0);
     //cerr << "r2 = " << res << endl;
     
     //ranked_results = query_and_merge("foo atbr nasse amund", mymmapper);

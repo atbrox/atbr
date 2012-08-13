@@ -1,5 +1,5 @@
 CC=clang++ # or g++
-EXTRAARGS=-framework CoreServices -Wc++11-extensions
+EXTRAARGS=-framework CoreServices -Wc++11-extensions #--std=c++11 -stdlib=libc++ 
 
 all: atbr_lookup Makefile.osx
 
