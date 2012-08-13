@@ -14,7 +14,8 @@
 #include <string.h> // strtok
 #include <unistd.h>
 #include <queue>
-#include <tr1/unordered_map>
+//#include <tr1/unordered_map> // old way
+#include <unordered_map>
 
 //#include "base64.h" // note: remember to free up tables correctly
 #include "mmapper.h"
@@ -28,7 +29,8 @@
 using std::priority_queue;
 using std::string;
 using std::vector;
-using std::tr1::unordered_map;
+//using std::tr1::unordered_map;
+using std::unordered_map;
 using std::endl;
 using std::cerr;
 using namespace std;

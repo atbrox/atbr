@@ -1,5 +1,5 @@
 CC=clang++ # or g++
-EXTRAARGS=-framework CoreServices -Wc++11-extensions #--std=c++11 -stdlib=libc++ 
+EXTRAARGS=-framework CoreServices -Wc++11-extensions --std=c++11 -stdlib=libc++ 
 
 all: atbr_lookup Makefile.osx
 
@@ -7,10 +7,10 @@ atbr_lookup: disk_or_ssd_lookup.o mmapper.o
 	$(CC) -O3 -v -ftime-report -I./include -o atbr_lookup disk_or_ssd_lookup.o mmapper.o $(EXTRAARGS)
 
 disk_or_ssd_lookup.o: disk_or_ssd_lookup.cpp *.h
-	$(CC) -O3 -v -ftime-report -I./include -c disk_or_ssd_lookup.cpp
+	$(CC) -O3 -v -ftime-report -I./include -c disk_or_ssd_lookup.cpp $(EXTRAARGS)
 
 mmapper.o: mmapper.cpp mmapper.h
-	$(CC) -O3 -v -ftime-report -I./include -c mmapper.cpp
+	$(CC) -O3 -v -ftime-report -I./include -c mmapper.cpp $(EXTRAARGS)
 
 stringperformancetest: stringperformancetest.cpp
 	$(CC) stringperformancetest.cpp -o stringperformancetest
