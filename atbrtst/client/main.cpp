@@ -74,38 +74,9 @@ int main(int argc, const char * argv[])
     
     cerr << "--->>>> Ranked results" << endl;
     
-    size_t len;
-    
-    string uri;
-    string duri;
+    string search_results = get_results(ranked_results);
 
-    int res_counter = 0;
-    
-    while(!ranked_results->empty()) {
-        //cerr << "before uri" << endl;
-        uri = ranked_results->top().second;
-        //cerr << "afer uri" << endl;
-        
-        //cerr << uri << endl;
-        //uri = base64_decode(uri.c_str(), uri.size(), &len);
-        
-        cerr << "uri = " << uri << ", freq = " << ranked_results->top().first << endl;
-        
-        //duri = base64_decode(uri.c_str(), uri.size(), &len);
-        //cerr << "duri = " << duri << endl;
-        
-        //cerr << "before pop" << endl;
-        ranked_results->pop();
-        //cerr << "afer pop" << endl;
-
-	if(res_counter > 10) {
-	  break;
-	}
-
-	++res_counter;
-    }
-    
-    cerr << "loop.." << endl;
+    cerr << search_results << endl;
     
     delete ranked_results;
     
