@@ -98,9 +98,21 @@ class SearchAPI {
 
 
   char* search(char* query) {
+    struct timeval start_time;
+    struct timeval stop_time;
+    double elapsed_microsec;
+    long start_microsec;
+    long stop_microsec;
+
     // assuming query contains space separated query terms
+    gettimeofday(&start_time, NULL);
     RankPriorityQueue* ranked_results = query_and_merge(query);
     string results = get_results(ranked_results);
+    gettimeofday(&stop_time, NULL);
+    stop_microsec = (stop_time.tv_sec*1000000) + (stop_time.tv_usec);
+    start_microsec = (start_time.tv_sec*1000000) + (start_time.tv_usec);
+    elapsed_microsec = stop_microsec-start_microsec;
+    cerr << "query took " << elapsed_microsec << " microseconds" << endl;
     return strdup(results.c_str()); // strdup?
   }
 
