@@ -60,7 +60,7 @@ setup(
             libraries=['python2.7'],
             include_dirs = ['/usr/include/python2.7'],
             #extra_compile_args = ['--std=c++11','-Wself-assign','-Wunused-variable','-Wc++11-extensions','--stdlib=libc++'],
-            extra_compile_args = ['-std=c++0x','-Wself-assign','-Wunused-variable'],
+            extra_compile_args = ['-std=c++0x','-Wunused-variable'],
             extra_link_args = ['-shared'],
             language=["c++"]
             ),
