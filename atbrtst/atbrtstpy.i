@@ -13,6 +13,7 @@
 class SearchAPI {
  public:
   SearchAPI(char* filename);
+  char* search(char* query);
   char* lookup(char* query);
 };
 

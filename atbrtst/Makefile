@@ -1,2 +1,2 @@
 clean:
-	rm -f *.o 
+	rm -f *.o *~ *_wrap.cpp atbrtst.py
