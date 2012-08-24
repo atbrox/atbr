@@ -13,7 +13,7 @@ import types
 import logging
 import os.path
 import base64
-from mrjob.protocol import RawValueProtocol
+from mrjob.protocol import *
 import time
 
 from patricia_tree import patricia
@@ -21,6 +21,7 @@ from patricia_tree import patricia
 GH_RESOLUTION = 5 # +- 2km
 
 class MRBuildAtbrTst(MRJob):
+    #OUTPUT_PROTOCOL = RawValueProtocol
     OUTPUT_PROTOCOL = RawValueProtocol
 
     def mapper_init(self):
@@ -70,7 +71,7 @@ class MRBuildAtbrTst(MRJob):
         except Exception, e:
                 self.increment_counter("reducer_init", str(e), 1)
 
-    def step_1(self):
+    def step_1(self, aggregate, mapping):
         self.increment_counter("reducer_final", "step1 starting", 1)
         pos = 0
         mapped_pos = {}
@@ -78,16 +79,16 @@ class MRBuildAtbrTst(MRJob):
         self.ordering_info = {}
         t2 = time.time()
         format = "%%0%dd" % (11)
-        for key in sorted(self.aggregate):
+        for key in sorted(aggregate):
             slim = ["", ""]
-            if self.mapping.has_key(key):
-                self.aggregate[key]["c"] = self.mapping[key]
-                slim[1] = self.mapping[key]
-            if self.aggregate[key].has_key("value"):
-                slim[0] = self.aggregate[key]["value"]
+            if mapping.has_key(key):
+                aggregate[key]["c"] = mapping[key]
+                slim[1] = mapping[key]
+            if aggregate[key].has_key("value"):
+                slim[0] = aggregate[key]["value"]
 
-            self.ordering_info[key] = (slim, self.aggregate[key]["full_val"])
-            self.all_words.append(self.aggregate[key]["full_val"])
+            self.ordering_info[key] = (slim, aggregate[key]["full_val"])
+            self.all_words.append(aggregate[key]["full_val"])
             mapped_pos[key] = format % (pos)
             data = "%s\n" % (json.dumps(slim))
             data_len = len(data)
@@ -95,13 +96,13 @@ class MRBuildAtbrTst(MRJob):
             pos += len(record_len) + data_len
             self.slimmed[key] = (record_len, slim)
         delta2 = time.time() - t2
-        return mapped_pos
+        return mapped_pos, aggregate
 
-    def step_2(self):
+    def step_2(self, all_words):
         self.increment_counter("reducer_final", "step2 starting", 1)
 
         t3 = time.time()
-        sorted_words = self.sort_words(self.all_words)
+        sorted_words = self.sort_words(all_words)
         delta3 = time.time() - t3
         word_to_order = {}
         for i, word in enumerate(sorted_words):
@@ -160,33 +161,41 @@ class MRBuildAtbrTst(MRJob):
                 address += record[4]
             delta6 = time.time() - t6
             print >> sys.stderr, "5. finished", delta6
-            #return ordered_new_records, new_map
+            return ordered_new_records, new_map
 
 
         except Exception, e:
             self.increment_counter("reducer_final", "step4 FAILED:" + str(e), 1)
-            yield "step4failed", new_records
+            #yield "step4failed", new_records
 
 
     def step_5(self, new_map, ordered_new_records):
-        self.increment_counter("reducer_final", "step5 starting", 1)
+        try:
+            values = []
+            #yield "BEFC", new_map
+            self.increment_counter("reducer_final", "step5 starting", 1)
 
-        t7 = time.time()
-        # UPDATE TO NEW ADDRESS REFERENCES
-        for record in ordered_new_records:
-            slim = record[7]
-            if type(slim[1]) == dict:
-                for key in slim[1]:
-                    new_address_info = new_map[int(slim[1][key])]
-                    (new_address, _) = new_address_info
-                    format = "%%0%dd" % (11) # HARDCODED!
-                    formatted_new_address = format % (new_address)
-                    slim[1][key] = formatted_new_address
-            value = "%s%s" % (record[5], json.dumps(slim))
-            yield "FOOBAR", value
-            #print value
-        delta7 = time.time() - t7
-        #print >> sys.stderr, "deltas = ", [delta0, delta1, delta2, delta3, delta4, delta5, delta6, delta7]
+            t7 = time.time()
+            # UPDATE TO NEW ADDRESS REFERENCES
+            for record in ordered_new_records:
+                slim = record[7]
+                if type(slim[1]) == dict:
+                    for key in slim[1]:
+                        new_address_info = new_map[int(slim[1][key])]
+                        (new_address, _) = new_address_info
+                        format = "%%0%dd" % (11) # HARDCODED!
+                        formatted_new_address = format % (new_address)
+                        slim[1][key] = formatted_new_address
+                value = "%s%s" % (record[5], json.dumps(slim))
+                values.append(value)
+                #yield "FOOBAR", value
+                #print value
+            delta7 = time.time() - t7
+            return values
+        except Exception, e:
+            self.increment_counter("reducer_final", "step5 FAILED:" + str(e), 1)
+
+            #print >> sys.stderr, "deltas = ", [delta0, delta1, delta2, delta3, delta4, delta5, delta6, delta7]
 
     def reducer_final(self):
         try:
@@ -198,34 +207,44 @@ class MRBuildAtbrTst(MRJob):
             self.zeroblock = "".join([str(0) for x in range(self.num_digits_to_represent_blocks)])
             #yield "finaltree", self.patricia_tree._data
 
-            self.mapping = {}
-            self.aggregate = {}
+            mapping = {}
+            aggregate = {}
             self.partition_tree(self.patricia_tree._data,
                 parent=self.zeroblock,
-                mapping=self.mapping,
-                aggregate=self.aggregate)
+                mapping=mapping,
+                aggregate=aggregate)
             self.ZEROVAL = u""
 
-            self.aggregate[self.zeroblock] = {'id':self.zeroblock,
-                                              "c":self.mapping[self.zeroblock],
+            aggregate[self.zeroblock] = {'id':self.zeroblock,
+                                              "c":mapping[self.zeroblock],
                                               "full_val": self.ZEROVAL}
+
+            yield "aggregate", aggregate
+            yield "mapping", mapping
 
             self.slimmed = {}
 
-            mapped_pos = self.step_1()
-            word_to_order = self.step_2()
+            mapped_pos, aggregate = self.step_1(aggregate, mapping)
+            yield "mappedpos", mapped_pos
+            yield "aggregate2", aggregate
+            word_to_order = self.step_2(self.all_words)
+            yield "wto", word_to_order
             new_records = self.step_3(mapped_pos, word_to_order)
+            yield "nrc", new_records
             ordered_new_records, new_map = self.step_4(new_records)
+            yield "ordered_new_records", ordered_new_records
+            yield "new_map", new_map
 
-            self.increment_counter("reducer_final", "after step4 ", 1)
+            #self.increment_counter("reducer_final", "after step4 ", 1)
 
 
 
             #print >> sys.stderr, "2. finished", delta2
 
-            self.step_5(new_map, ordered_new_records)
+            values = self.step_5(new_map, ordered_new_records)
+            yield "values", values
         except Exception, e:
-                self.increment_counter("reducer_final", str(e), 1)
+            self.increment_counter("reducer_final", str(e), 1)
 
 
     def steps(self):

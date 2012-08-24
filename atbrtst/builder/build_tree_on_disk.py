@@ -70,6 +70,7 @@ def read_tsv(argv,file_encoding="latin-1"):
     for line in codecs.open(filename, encoding=file_encoding):
         #print sys.stderr, "line = ", [line]
         word, value = line.strip().split("\t")#.lower()
+        print >> sys.stderr, [word, value]
         word = json.loads(word.strip())
         value = json.loads(value.strip())
         nvalue = ",".join(value)
