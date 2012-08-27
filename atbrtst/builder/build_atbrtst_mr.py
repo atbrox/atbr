@@ -7,7 +7,8 @@ from atbr import atbr
 import os
 import sys
 from Geohash import encode as ghencode
-import json
+#import json
+import ujson # json without spacing
 #import traceback
 import types
 import logging
@@ -50,10 +51,12 @@ class MRBuildAtbrTst(MRJob):
         return only_sorted_words
 
     def reducer(self, shard_key, key_value_pairs):
+        debugval = ""
         try:
             for key_value in key_value_pairs:
                 _, value = key_value
                 key, value = value.split("\t")
+                debugval = value
                 if not self.patricia_tree.isWord(key):
                     self.patricia_tree.addWord(key)
                     self.keyvalue.put(key, value)
@@ -219,21 +222,21 @@ class MRBuildAtbrTst(MRJob):
                                               "c":mapping[self.zeroblock],
                                               "full_val": self.ZEROVAL}
 
-            yield "aggregate", aggregate
-            yield "mapping", mapping
+            #yield "aggregate", aggregate
+            #yield "mapping", mapping
 
             self.slimmed = {}
 
             mapped_pos, aggregate = self.step_1(aggregate, mapping)
-            yield "mappedpos", mapped_pos
-            yield "aggregate2", aggregate
+            #yield "mappedpos", mapped_pos
+            #yield "aggregate2", aggregate
             word_to_order = self.step_2(self.all_words)
-            yield "wto", word_to_order
+            #yield "wto", word_to_order
             new_records = self.step_3(mapped_pos, word_to_order)
-            yield "nrc", new_records
+            #yield "nrc", new_records
             ordered_new_records, new_map = self.step_4(new_records)
-            yield "ordered_new_records", ordered_new_records
-            yield "new_map", new_map
+            #yield "ordered_new_records", ordered_new_records
+            #yield "new_map", new_map
 
             #self.increment_counter("reducer_final", "after step4 ", 1)
 
@@ -242,7 +245,9 @@ class MRBuildAtbrTst(MRJob):
             #print >> sys.stderr, "2. finished", delta2
 
             values = self.step_5(new_map, ordered_new_records)
-            yield "values", values
+            for value in values:
+                yield "", value
+            #yield "values", values
         except Exception, e:
             self.increment_counter("reducer_final", str(e), 1)
 
