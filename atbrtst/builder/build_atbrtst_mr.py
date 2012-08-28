@@ -3,7 +3,7 @@ from mrjob.job import MRJob
 
 from operator import itemgetter
 
-from atbr import atbr
+#from atbr import atbr
 import os
 import sys
 from Geohash import encode as ghencode
@@ -40,6 +40,12 @@ class MRBuildAtbrTst(MRJob):
         except Exception, e:
             self.increment_counter("mapper", str(e), 1)
 
+#    def combiner_init(self):
+#        pass
+#
+#    def combiner(self):
+#        pass
+
     def sort_words(self,words):
         """sort first due to length and then due to alphanumerical
        in order to make sure that a prefix come before words that uses
@@ -59,7 +65,7 @@ class MRBuildAtbrTst(MRJob):
                 debugval = value
                 if not self.patricia_tree.isWord(key):
                     self.patricia_tree.addWord(key)
-                    self.keyvalue.put(key, value)
+                    self.keyvalue[key] = value
                     self.all_keys.append(key)
         except Exception, e:
             self.increment_counter("reducer", str(e) + debugval, 1)
@@ -69,7 +75,7 @@ class MRBuildAtbrTst(MRJob):
         try:
             self.all_keys = []
             self.patricia_tree = patricia()
-            self.keyvalue = atbr.Atbr()
+            self.keyvalue = {} #atbr.Atbr()
 
         except Exception, e:
                 self.increment_counter("reducer_init", str(e), 1)
@@ -202,8 +208,9 @@ class MRBuildAtbrTst(MRJob):
 
     def reducer_final(self):
         try:
+            # use key as value for easy replacement
             for key in self.all_keys:
-                self.patricia_tree.addVal(key, key[::-1])
+                self.patricia_tree.addVal(key, key)
 
             self.global_block = 1
             self.num_digits_to_represent_blocks = 11 # int(math.log10(max_num_blocks)+1)
@@ -252,13 +259,6 @@ class MRBuildAtbrTst(MRJob):
             self.increment_counter("reducer_final", str(e), 1)
 
 
-    def steps(self):
-        return [self.mr(mapper_init=self.mapper_init,
-            mapper=self.mapper,
-            mapper_final=self.mapper_final,
-            reducer=self.reducer,
-            reducer_init=self.reducer_init,
-            reducer_final=self.reducer_final), ]
 
     def partition_tree(self, input, parent,level=0,
                   mapping={},
@@ -312,6 +312,14 @@ class MRBuildAtbrTst(MRJob):
             format = "%%0%dd" % (self.num_digits_to_represent_blocks)
             self.partition_tree(nested, level=level + 1, parent=data.get("id", self.zeroblock),
                 mapping=mapping, aggregate=aggregate, parent_val=full_val)
+
+    def steps(self):
+        return [self.mr(mapper_init=self.mapper_init,
+            mapper=self.mapper,
+            mapper_final=self.mapper_final,
+            reducer=self.reducer,
+            reducer_init=self.reducer_init,
+            reducer_final=self.reducer_final), ]
 
 
 if __name__ == '__main__':
