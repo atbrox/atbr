@@ -277,12 +277,14 @@ class MRBuildAtbrTst(MRJob):
             #print >> sys.stderr, "2. finished", delta2
 
             values = self.step_5(self.new_map, self.ordered_new_records)
-            for value in values:
-                yield "", value
+            # NOTE: ONLY REGULAR ATBRTST OUTPUT HERE
+            #for value in values:
+            #    yield "", value
 
             self.step_6(values)
             self.step_7(values)
 
+            # NOTE: WITH FINAL VALUES HERE
             for value in self.final_values:
                 yield "", value.strip()
             #yield "values", values
