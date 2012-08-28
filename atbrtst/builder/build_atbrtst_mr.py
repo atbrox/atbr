@@ -147,30 +147,28 @@ class MRBuildAtbrTst(MRJob):
     def step_4(self, new_records):
         self.increment_counter("reducer_final", "step4 starting", 1)
 
-        ordered_new_records = None
-        new_map = None
+        self.ordered_new_records = None
+        self.new_map = {}
 
         try:
             # REORDERING RECORDS ACCORDING TO SORTED ENTRIES
             t5 = time.time()
-            ordered_new_records = sorted(new_records, key=itemgetter(0))
+            self.ordered_new_records = sorted(new_records, key=itemgetter(0))
             delta5 = time.time() - t5
             t6 = time.time()
             address = 0
-            new_map = {}
             self.increment_counter("reducer_final", "step 4 HERE",1)
-            for record in ordered_new_records:
+            for record in self.ordered_new_records:
                 new_record = (address, record)
-                self.increment_counter("reducer_final", "step 4 HERE2",1)
+                #self.increment_counter("reducer_final", "step 4 HERE2",1)
                 value = "%s%s\n" % (record[5], record[6])
-                self.increment_counter("reducer_final", "step 4 HERE3:" + value,1)
+                #self.increment_counter("reducer_final", "step 4 HERE3:" + value,1)
                 assert len(value) == record[4]
                 old_address = record[2]
-                new_map[old_address] = (address, record[3])
+                self.new_map[old_address] = (address, record[3])
                 address += record[4]
-            delta6 = time.time() - t6
-            print >> sys.stderr, "5. finished", delta6
-            return ordered_new_records, new_map
+            #delta6 = time.time() - t6
+            #return ordered_new_records, new_map
 
 
         except Exception, e:
@@ -241,7 +239,10 @@ class MRBuildAtbrTst(MRJob):
             #yield "wto", word_to_order
             new_records = self.step_3(mapped_pos, word_to_order)
             #yield "nrc", new_records
-            ordered_new_records, new_map = self.step_4(new_records)
+
+            # produces self.ordered_new_records, self.new_map
+            self.step_4(new_records)
+            #ordered_new_records, new_map = self.step_4(new_records)
             #yield "ordered_new_records", ordered_new_records
             #yield "new_map", new_map
 
@@ -251,7 +252,7 @@ class MRBuildAtbrTst(MRJob):
 
             #print >> sys.stderr, "2. finished", delta2
 
-            values = self.step_5(new_map, ordered_new_records)
+            values = self.step_5(self.new_map, self.ordered_new_records)
             for value in values:
                 yield "", value
             #yield "values", values
