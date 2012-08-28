@@ -6,10 +6,10 @@ from operator import itemgetter
 #from atbr import atbr
 import os
 import sys
-from Geohash import encode as ghencode
+#from Geohash import encode as ghencode
 #import json
-import ujson # json without spacing
-#import traceback
+import json # json without spacing
+import traceback
 import types
 import logging
 import os.path
@@ -23,6 +23,7 @@ GH_RESOLUTION = 5 # +- 2km
 
 class MRBuildAtbrTst(MRJob):
     #OUTPUT_PROTOCOL = RawValueProtocol
+    #INPUT_PROTOCOL = RawProtocol
     OUTPUT_PROTOCOL = RawValueProtocol
 
     def mapper_init(self):
@@ -36,6 +37,11 @@ class MRBuildAtbrTst(MRJob):
             # only send further to reducer
             # perhaps later shard on word prefix (or hash(uri) if a document is input)
             shard_key = "1"
+            #key = key.decode("latin-1").encode("utf-8")
+            #value = value.decode("latin-1").encode("utf-8")
+
+        #key = unicode(key.decode("latin-1"))
+             #value = unicode(value.decode("latin-1"))
             yield shard_key, (key, value)
         except Exception, e:
             self.increment_counter("mapper", str(e), 1)
@@ -62,11 +68,12 @@ class MRBuildAtbrTst(MRJob):
             for key_value in key_value_pairs:
                 _, value = key_value
                 key, value = value.split("\t")
+                okey = json.loads(key)
                 debugval = value
-                if not self.patricia_tree.isWord(key):
-                    self.patricia_tree.addWord(key)
+                if not self.patricia_tree.isWord(okey):
+                    self.patricia_tree.addWord(okey)
                     self.keyvalue[key] = value
-                    self.all_keys.append(key)
+                    self.all_keys.append(okey)
         except Exception, e:
             self.increment_counter("reducer", str(e) + debugval, 1)
             # TODO: need counters here
@@ -82,6 +89,7 @@ class MRBuildAtbrTst(MRJob):
 
     def step_1(self, aggregate, mapping):
         self.increment_counter("reducer_final", "step1 starting", 1)
+        t0 = time.time()
         pos = 0
         mapped_pos = {}
         self.all_words = []
@@ -104,24 +112,28 @@ class MRBuildAtbrTst(MRJob):
             record_len = "%011d" % (data_len + 11) # itself!
             pos += len(record_len) + data_len
             self.slimmed[key] = (record_len, slim)
-        delta2 = time.time() - t2
+        delta = time.time() - t0
+        self.increment_counter("reducer_final", "step1 took " + str(delta) + "s", 1)
         return mapped_pos, aggregate
 
     def step_2(self, all_words):
         self.increment_counter("reducer_final", "step2 starting", 1)
 
-        t3 = time.time()
+        t0 = time.time()
         sorted_words = self.sort_words(all_words)
-        delta3 = time.time() - t3
         word_to_order = {}
         for i, word in enumerate(sorted_words):
             word_to_order[word] = i
         #t4 = time.time()
-        print >> sys.stderr, "3. finished", delta3
+        #print >> sys.stderr, "3. finished", delta3
+        delta = time.time() - t0
+        self.increment_counter("reducer_final", "step2 took " + str(delta) + "s", 1)
+
         return word_to_order
 
     def step_3(self, mapped_pos, word_to_order):
         self.increment_counter("reducer_final", "step3 starting", 1)
+        t0 = time.time()
 
         new_records = []
         slim_sorted = sorted(self.slimmed)
@@ -142,10 +154,13 @@ class MRBuildAtbrTst(MRJob):
             address += val_len # need to add '\n'
         #delta4 = time.time() - t4
         #print >> sys.stderr, "4. finished", delta4
+        delta = time.time() - t0
+        self.increment_counter("reducer_final", "step3 took " + str(delta) + "s", 1)
         return new_records
 
     def step_4(self, new_records):
         self.increment_counter("reducer_final", "step4 starting", 1)
+        t0 = time.time()
 
         self.ordered_new_records = None
         self.new_map = {}
@@ -170,6 +185,8 @@ class MRBuildAtbrTst(MRJob):
             #delta6 = time.time() - t6
             #return ordered_new_records, new_map
 
+            delta = time.time() - t0
+            self.increment_counter("reducer_final", "step4 took " + str(delta) + "s", 1)
 
         except Exception, e:
             self.increment_counter("reducer_final", "step4 FAILED:" + str(e), 1)
@@ -178,6 +195,7 @@ class MRBuildAtbrTst(MRJob):
 
     def step_5(self, new_map, ordered_new_records):
         try:
+            t0 = time.time()
             values = []
             #yield "BEFC", new_map
             self.increment_counter("reducer_final", "step5 starting", 1)
@@ -198,7 +216,13 @@ class MRBuildAtbrTst(MRJob):
                 #yield "FOOBAR", value
                 #print value
             delta7 = time.time() - t7
+            #return values
+            delta = time.time() - t0
+
+            self.increment_counter("reducer_final", "step5 took " + str(delta) + "s", 1)
+
             return values
+
         except Exception, e:
             self.increment_counter("reducer_final", "step5 FAILED:" + str(e), 1)
 
@@ -255,6 +279,12 @@ class MRBuildAtbrTst(MRJob):
             values = self.step_5(self.new_map, self.ordered_new_records)
             for value in values:
                 yield "", value
+
+            self.step_6(values)
+            self.step_7(values)
+
+            for value in self.final_values:
+                yield "", value.strip()
             #yield "values", values
         except Exception, e:
             self.increment_counter("reducer_final", str(e), 1)
@@ -313,6 +343,195 @@ class MRBuildAtbrTst(MRJob):
             format = "%%0%dd" % (self.num_digits_to_represent_blocks)
             self.partition_tree(nested, level=level + 1, parent=data.get("id", self.zeroblock),
                 mapping=mapping, aggregate=aggregate, parent_val=full_val)
+
+    def step_6(self, values):
+        self.increment_counter("reducer_final", "step6 starting", 1)
+
+        t0 = time.time()
+
+        new_start_address = 0
+        orig_start_address = 0
+        i = 0
+        self.old_to_new_address = {}
+        lines = []
+        line_len = 0
+        data = ""
+
+        for line in values:
+            orig_len = len(line)
+            line = line.strip()
+            try:
+                line_len = int(line.split("[")[0])
+            except Exception, e:
+                print >> sys.stderr, "line = ", [line]
+                print >> sys.stderr, e
+                print >> sys.stderr, line.split('[')
+                sys.exit(1)
+
+            try:
+                data = json.loads(line[11:line_len])
+            except Exception, e:
+                print >> sys.stderr, e
+                #traceback.print_exc()
+                print >> sys.stderr, "line, line[11:] = ", [line, line[11:line_len]]
+            jdata = ""
+
+            dlen_before = line_len
+            dlen_after = 0 # assuming no value
+
+            if data[0] != "":
+                a = ""
+                try:
+                    key = json.dumps(data[0])
+                    a = json.loads(self.keyvalue.get(json.dumps(data[0])))
+                except Exception, e:
+                    print >> sys.stderr, e
+                    print >> sys.stderr, "DATA = ", [data]
+                    print >> sys.stderr, "LINE = ", [line]
+                    print >> sys.stderr, " a= ", [i, a]
+                    print >> sys.stderr, data[0], json.dumps(data[0])
+                    sys.exit(1)
+                    #print >> sys.stderr, "a = ", a
+                #b = u",".join(a)
+                #c = b.replace(u"  ", u" ")
+                dlen_before = line_len
+                #data.append(a)
+                key = data[0]
+                data[0] = a # c
+                #data.append(key) # FORDEBUGGING!!
+
+                #foo = "%s%s\n" % ()
+
+            if data[1] != "":
+                pass
+                #c = data[1]
+                #print >> sys.stderr, "c = ", c
+
+            jdata = json.dumps(data)
+            dlen_after = len(jdata) + 11 +1  # +1?
+
+            self.old_to_new_address[orig_start_address] = new_start_address
+            print >> sys.stderr, "!@@", self.old_to_new_address
+
+            if i % 10000 == 0:
+                print >> sys.stderr, "1st iteration, i = ", i
+                print >> sys.stderr, ">>", [dlen_after, orig_len, line_len, len(jdata)]
+                print >> sys.stderr, "okDATA = ", [data,jdata, len(jdata),len(line)]
+                print >> sys.stderr, "okLINE = ", [line, repr(line), repr(jdata)]
+                #sys.exit(1)
+
+            i += 1
+
+
+            #print "\t".join([str(orig_start_address), str(new_start_address), str(dlen_before), str(dlen_after), jdata])
+            #lines.append([orig_start_address,new_start_address,dlen_before,dlen_after,data])
+
+            orig_start_address += dlen_before
+            new_start_address += dlen_after
+
+        delta = time.time()-t0
+        self.increment_counter("reducer_final", "step6 took " + str(delta) + "s", 1)
+
+    def step_7(self, values):
+        try:
+            self.increment_counter("reducer_final", "step7 starting", 1)
+            t0 = time.time()
+
+            self.final_values = []
+
+            t0 = time.time()
+
+            new_start_address = 0
+            orig_start_address = 0
+            i = 0
+            lines = []
+            line_len = 0
+            data = ""
+
+            for line in values:
+                orig_line_len = len(line)  #includes newline, should check against line_len
+                line = line.strip()
+                line_len = int(line.split("[")[0])
+                data = json.loads(line[11:line_len])
+                #jdata = json.dumps(data)
+                jdata = ""
+
+                dlen_before = line_len
+                dlen_after = 0 # assuming no value
+
+                if data[1] != "":
+                    keys = 0
+                    for key in data[1]:
+                        old_address = data[1][key]
+                        # TODO: fix address format
+                        print >> sys.stderr, "##", self.old_to_new_address
+                        new_address = self.old_to_new_address[int(old_address)]
+                        data[1][key] = self.format_address(new_address)
+                        #mapped_to[int(old_address)]  = new_address
+                        keys += 1
+                    if i% 10000 == 0:
+                        print >> sys.stderr, "2nd: data[1] != blank", data[1], keys
+                        #print >> sys.stderr, "c = ", c
+                if data[0] != "":
+                    a = ""
+                    try:
+                        print >> sys.stderr, "TRYING HERE:", data[0]
+                        a = json.loads(self.keyvalue.get(json.dumps(data[0])))
+                    except Exception, e:
+                        print >> sys.stderr, e
+                        print >> sys.stderr, "LINE = ", [line]
+                        #print sys.stderr, data[0], data
+                        sys.exit(1)
+                        #print >> sys.stderr, "a = ", a
+                    #b = u",".join(a)
+                    #c = b.replace(u"  ", u" ")
+                    #dlen_before = line_len
+                    #data.append(a)
+                    key = data[0]
+                    data[0] = a
+                    #data.append(key) # FORDEBUGGING!!
+                    #jdata = json.dumps(data)
+                    #dlen_after = len(jdata) + 11# newline and address
+
+                # need to do this after any changes to data..
+                jdata = json.dumps(data)
+                dlen_after = len(jdata) + 11  +1
+
+
+                # TODO: fix address format and print out
+                output = "%s%s\n" % (self.format_address(dlen_after), jdata)
+
+                self.final_values.append(output)
+
+                assert dlen_after == len(output)
+
+                if i% 10000 == 0:
+                    print >> sys.stderr, "### len(jdata), len(output), dlen_after, dlen_before = ", len(jdata), len(output), dlen_after, dlen_before
+                    print >> sys.stderr, "2nd iteration, i = ", i, len(output)-len(jdata),len(self.format_address(new_start_address)),len("\n"), len(jdata)
+
+                i += 1
+
+
+                #output_fh.write(output)
+                #print output
+
+                orig_start_address += dlen_before
+                new_start_address += dlen_after
+
+            delta = time.time()-t0
+            self.increment_counter("reducer_final", "step7 took " + str(delta) + "s", 1)
+        except Exception, e:
+            self.increment_counter("reducer_final", "step7 FAILED:" + str(e), 1)
+            traceback.print_exc()
+
+
+
+
+    def format_address(self,address):
+        format = "%%0%dd" % (11)
+        return format % (address)
+
+
 
     def steps(self):
         return [self.mr(mapper_init=self.mapper_init,
