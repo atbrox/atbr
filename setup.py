@@ -15,7 +15,7 @@ import os
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-python_version = "2.7"
+python_version = "2.6"
 
 os.environ['CC'] = 'g++'
 #os.environ['CC'] = 'c++'
@@ -57,7 +57,7 @@ setup(
             "atbrtst._atbrtst",
             sources = ["atbrtst/atbrtstpy.i"],
             swig_opts=["-Wall","-c++"],
-            libraries=['python2.7'],
+            libraries=['python2.6'],
             include_dirs = ['/usr/include/python2.7'],
             #extra_compile_args = ['--std=c++11','-Wself-assign','-Wunused-variable','-Wc++11-extensions','--stdlib=libc++'],
             extra_compile_args = ['-std=c++0x','-Wunused-variable'],
