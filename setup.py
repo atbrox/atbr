@@ -15,13 +15,25 @@ import os
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-python_version = "2.6"
-
+python_version = 2.6
 os.environ['CC'] = 'g++'
-#os.environ['CC'] = 'c++'
 os.environ['CXX'] = 'g++'
 os.environ['CPP'] = 'g++'
 os.environ['LDSHARED'] = 'g++'
+extra_compile_args = ['-std=c++0x','-DSPARSE_MAP']
+extra_link_args = ['-shared', '-lrt']
+
+#print os.uname()
+
+if "Darwin" in os.uname()[0]:
+    python_version = "2.7"
+    os.environ['CC'] = 'c++'
+    os.environ['CXX'] = 'c++'
+    os.environ['CPP'] = 'c++'
+    os.environ['LDSHARED'] = 'c++'
+    extra_compile_args = ['-std=c++0x']
+    extra_link_args = ['-shared']
+    
 
 #print os.environ.keys()
 #print os.environ.values()
@@ -49,21 +61,10 @@ setup(
             libraries=['python%s' % (python_version)],
             include_dirs = ['/usr/include/python%s' % (python_version)],
     #        extra_compile_args = ['-std=c++0x','-Wself-assign','-Wunused-variable'],
-            extra_compile_args = ['-std=c++0x','-DSPARSE_MAP'],
-            extra_link_args = ['-shared', '-lrt'],
-            language=["c++"]
-            ),
-        Extension( 
-            "atbrtst._atbrtst",
-            sources = ["atbrtst/atbrtstpy.i"],
-            swig_opts=["-Wall","-c++"],
-            libraries=['python2.6'],
-            include_dirs = ['/usr/include/python2.7'],
-            #extra_compile_args = ['--std=c++11','-Wself-assign','-Wunused-variable','-Wc++11-extensions','--stdlib=libc++'],
-            extra_compile_args = ['-std=c++0x','-Wunused-variable'],
-            extra_link_args = ['-shared'],
+            extra_compile_args = extra_compile_args,
+            extra_link_args = extra_link_args,
             language=["c++"]
             ),
         ],
-    packages=['atbr', 'atbrserver', 'atbrthrift','atbrtst','atbrtst.builder','atbrtst.client']
+    packages=['atbr'] # , 'atbrserver', 'atbrthrift','atbrtst','atbrtst.builder','atbrtst.client']
     )

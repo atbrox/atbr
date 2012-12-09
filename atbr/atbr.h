@@ -92,6 +92,8 @@ typedef unordered_map<string, string> AtbrMapType;
     
     void load(const char* filename) {
 
+      cerr << "Starting to load " << filename << endl;
+
       unsigned long size_before = size();
       unsigned long totsize = 0;
 
@@ -113,7 +115,7 @@ typedef unordered_map<string, string> AtbrMapType;
 	      }
 
 	      line_len = strlen(linebuffer);
-	      if(line_len > 100000) {
+	      if(line_len >= LINE_BUFFER_SIZE-1) {
 		cerr << "long line, len = " << line_len << endl;
 	      }
 
