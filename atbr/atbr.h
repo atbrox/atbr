@@ -5,6 +5,9 @@
 #include <stdint.h>
 #include <time.h>
 #include <unistd.h>
+#ifdef __APPLE__
+#include <sys/time.h>
+#endif
 #ifndef __APPLE__
 #include <cstring>
 #endif
@@ -91,6 +94,8 @@ typedef unordered_map<string, string> AtbrMapType;
     }
     
     void load(const char* filename) {
+      long micro_start=0;
+      long micro_stop=0;
 
       cerr << "Starting to load " << filename << endl;
 
@@ -100,6 +105,10 @@ typedef unordered_map<string, string> AtbrMapType;
 #ifndef __APPLE__
       struct timespec start, stop;
       clock_gettime(CLOCK_MONOTONIC, &start);
+#else
+      struct timeval start_time;
+      gettimeofday(&start_time, NULL);
+      micro_start = (start_time.tv_sec * 1000000) + (start_time.tv_usec);
 #endif
 
       FILE* fp = fopen(filename, "r");
@@ -136,15 +145,20 @@ typedef unordered_map<string, string> AtbrMapType;
 
 #ifndef __APPLE__      
       clock_gettime(CLOCK_MONOTONIC, &stop);
-
-      unsigned long size_after = size();
       double second_diff = timeDiff(&stop,&start)/1000000000.0;
-
-      printf("Inserting took - %f seconds\n", second_diff);
-      printf("Num new key-value pairs = %ld\n", (size_after-size_before));
-      printf("Speed: %f key-value pairs per second\n", (size_after-size_before)/second_diff);
-      printf("Throughput: %f MB per second\n", (totsize/(1024*1024.0))/second_diff);
+#else
+      struct timeval stop_time;
+      gettimeofday(&stop_time, NULL);
+      micro_stop = (stop_time.tv_sec * 1000) + (stop_time.tv_usec / 1000);
+      double second_diff = (micro_stop-micro_start)/1000000.0;
 #endif
+      unsigned long size_after = size();
+
+      fprintf(stderr, "Inserting took - %f seconds\n", second_diff);
+      fprintf(stderr, "Num new key-value pairs = %ld\n", (size_after-size_before));
+      fprintf(stderr, "Speed: %f key-value pairs per second\n", (size_after-size_before)/second_diff);
+      fprintf(stderr, "Throughput: %f MB per second\n", (totsize/(1024*1024.0))/second_diff);
+
     }
 
 

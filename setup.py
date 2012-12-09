@@ -50,7 +50,7 @@ setup(
     author_email = 'amund@atbrox.com',
     description = ("low-latency and memory-efficient key-value store"),
     long_description=read('FEATURES'),
-    version = "0.31", 
+    version = "0.32", 
     license = "Apache License 2.0",
     url = "http://atbr.atbrox.com",
     ext_modules = [ 
