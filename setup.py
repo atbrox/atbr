@@ -20,7 +20,8 @@ os.environ['CC'] = 'g++'
 os.environ['CXX'] = 'g++'
 os.environ['CPP'] = 'g++'
 os.environ['LDSHARED'] = 'g++'
-extra_compile_args = ['-std=c++0x','-DSPARSE_MAP']
+#extra_compile_args = ['-std=c++0x','-DSPARSE_MAP']
+extra_compile_args = ['-std=c++0x']
 extra_link_args = ['-shared', '-lrt']
 
 #print os.uname()
