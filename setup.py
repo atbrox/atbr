@@ -15,7 +15,7 @@ import os
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-python_version = 2.6
+python_version = 2.7
 os.environ['CC'] = 'g++'
 os.environ['CXX'] = 'g++'
 os.environ['CPP'] = 'g++'
